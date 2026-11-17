@@ -43,7 +43,17 @@ export class VehicleAgent {
       alertsAtSend: record.analysis.alerts.length,
     };
     this.tasks.set(rec.taskId, rec);
-    const res = await this.gateway.call(target, rpc, { kind: 'service_request' });
+    let res;
+    try {
+      res = await this.gateway.call(target, rpc, { kind: 'service_request' });
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : `failed without an error object (${String(e)})`;
+      this.logger?.error('service_request_failed', { taskId: rec.taskId, gateway: target.gatewayName ?? mode, err: msg, stack: e?.stack });
+      rec.state = 'failed';
+      rec.error = `Sending through ${target.gatewayName ?? mode} failed: ${msg}`;
+      rec.timeline.push({ at: nowIso(), stage: 'send_failed', state: 'failed', text: rec.error, via: mode });
+      return rec;
+    }
     rec.initialResponse = { status: res.status, body: res.data };
     rec.protocol = res.protocol ?? 'poc';
     if (!res.ok || res.data?.error) {

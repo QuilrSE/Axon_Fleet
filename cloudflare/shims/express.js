@@ -22,7 +22,7 @@ class Router {
     return this;
   }
   route(method, path, fns) {
-    this.stack.push({ type: 'route', method, ...compile(path), fns: fns.flat() });
+    this.stack.push({ type: 'route', method, path, ...compile(path), fns: fns.flat() });
     return this;
   }
   get(path, ...fns) { return this.route('GET', path, fns); }
@@ -52,6 +52,7 @@ class Router {
         const m = layer.re.exec(req.path);
         if (!m) return next();
         req.params = Object.fromEntries(layer.keys.map((k, n) => [k, decodeURIComponent(m[n + 1])]));
+        (req.matchedRoutes ??= []).push(`${layer.method} ${layer.path}`);
         let j = 0;
         const inner = async (e) => {
           if (e) return next(e);
@@ -61,7 +62,8 @@ class Router {
         };
         return await inner();
       } catch (e) {
-        return next(e);
+        // An empty thrown value is still a failure (never "continue routing" → misleading 404).
+        return next(e ?? new Error('Request handler failed without an error object'));
       }
     };
     await next();
@@ -139,7 +141,7 @@ function express() {
     const res = new Response_();
     await app.run(req, res, (err) => {
       if (res.finished) return;
-      if (err) res.status(err.status || 500).json({ error: { code: err.code || 'INTERNAL', message: err.message } });
+      if (err) res.status(err.status || 500).json({ error: { code: err.code || 'INTERNAL', message: err.message ?? String(err) } });
       else res.status(404).json({ error: { code: 'NOT_FOUND', message: `${req.method} ${req.path} not found` } });
     });
     if (!res.finished) await Promise.race([res.done, new Promise((r) => setTimeout(r, 30_000))]);

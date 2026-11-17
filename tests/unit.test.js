@@ -183,3 +183,36 @@ describe('Telemetry and decision logic', () => {
     assert.equal(appt.bay.id, 'BAY-2');
   });
 });
+
+describe('handler failures are never reported as "not found"', () => {
+  test('Node/Express: a handler rejecting with undefined returns 500 with an explanation', async () => {
+    const express = (await import('express')).default;
+    const { asyncHandler, errorHandler, listen, closeServer } = await import('@axon-fleet/shared');
+    const app = express();
+    app.post('/api/x', asyncHandler(async () => { throw undefined; }));
+    app.use((req, res) => res.status(404).json({ error: { message: 'not found' } }));
+    app.use(errorHandler());
+    const server = await listen(app, 0, '127.0.0.1');
+    try {
+      const r = await fetch(`http://127.0.0.1:${server.address().port}/api/x`, { method: 'POST' });
+      assert.equal(r.status, 500);
+      assert.match((await r.json()).error.message, /failed without an error object/);
+    } finally { await closeServer(server); }
+  });
+
+  test('Workers router: same rule, and a matched route is named if it ever falls through', async () => {
+    const express = (await import('../cloudflare/shims/express.js')).default;
+    const { asyncHandler, errorHandler } = await import('@axon-fleet/shared');
+    const app = express();
+    app.use((req, res, next) => { next(); });
+    app.post('/api/x', asyncHandler(async () => { throw null; }));
+    app.post('/api/y', (req, res, next) => next());
+    app.use((req, res) => res.status(404).json({ error: { message: req.matchedRoutes?.length ? `matched ${req.matchedRoutes.join(',')}` : 'missing' } }));
+    app.use(errorHandler());
+    const x = await app.fetch(new Request('https://h/api/x', { method: 'POST' }));
+    assert.equal(x.status, 500);
+    const y = await app.fetch(new Request('https://h/api/y', { method: 'POST' }));
+    assert.equal(y.status, 404);
+    assert.equal((await y.json()).error.message, 'matched POST /api/y');
+  });
+});

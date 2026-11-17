@@ -80,7 +80,7 @@ export function createAgentA(cfg) {
   app.post('/api/config/reset', (req, res) => { gateway.connectivity.resetMode('agent-a-dashboard'); res.json(gateway.describe()); });
   app.use(buildGatewayRoutes({ connectivity: gateway.connectivity, securityEvents, agentEnvPrefix: 'AGENT_A' }));
   app.use(buildIdentityRoutes({ cfg, connectivity: gateway.connectivity, getBaseUrl, securityEvents, peer: () => ({ label: 'Agent B (dealership)', cardUrl: gateway.peerCardUrl(), directEndpoint: gateway.peerDirectUrl(), isDefault: !gateway.runtime.get('peerCardUrl'), defaultCardUrl: cfg.agentBCardUrl }) }));
-  app.use((req, res) => res.status(404).json({ error: { code: 'NOT_FOUND', message: `${req.method} ${req.path} does not exist on ${cfg.agentId}` } }));
+  app.use((req, res) => res.status(404).json({ error: { code: 'NOT_FOUND', message: req.matchedRoutes?.length ? `${req.method} ${req.path} matched route ${req.matchedRoutes.join(', ')} on ${cfg.agentId}, but its handler finished without responding (an internal failure, not a missing route). Check the Worker logs.` : `${req.method} ${req.path} does not exist on ${cfg.agentId}` } }));
   app.use(errorHandler(logger));
 
   let server = null;

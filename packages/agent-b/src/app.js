@@ -65,7 +65,7 @@ export function createAgentB(cfg) {
   app.use(buildGatewayRoutes({ connectivity: gateway.connectivity, securityEvents, agentEnvPrefix: 'AGENT_B' }));
   app.use(buildIdentityRoutes({ cfg, connectivity: gateway.connectivity, getBaseUrl, securityEvents, peer: null }));
   app.post('/api/reset', (req, res) => { agent.reset(); exchanges.clear(); securityEvents.clear(); res.json({ reset: true }); });
-  app.use((req, res) => res.status(404).json({ error: { code: 'NOT_FOUND', message: `${req.method} ${req.path} does not exist on ${cfg.agentId}` } }));
+  app.use((req, res) => res.status(404).json({ error: { code: 'NOT_FOUND', message: req.matchedRoutes?.length ? `${req.method} ${req.path} matched route ${req.matchedRoutes.join(', ')} on ${cfg.agentId}, but its handler finished without responding (an internal failure, not a missing route). Check the Worker logs.` : `${req.method} ${req.path} does not exist on ${cfg.agentId}` } }));
   app.use(errorHandler(logger));
 
   let server = null;

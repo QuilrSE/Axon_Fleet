@@ -16,7 +16,10 @@ export function corsMiddleware(origins = process.env.CORS_ORIGINS || '*') {
   return cors({ origin: list.includes('*') ? true : list });
 }
 
-export const asyncHandler = (fn) => (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next);
+/** Wrap async route handlers. A rejection with an empty reason (undefined/null) must still be an
+ *  error: passing it to next() as-is would continue routing and end in a misleading 404. */
+export const toError = (e) => (e instanceof Error ? e : Object.assign(new Error(e === undefined || e === null || e === '' ? 'Request handler failed without an error object' : (typeof e === 'string' ? e : `Request handler failed: ${JSON.stringify(e)?.slice(0, 300)}`)), { cause: e }));
+export const asyncHandler = (fn) => (req, res, next) => Promise.resolve().then(() => fn(req, res, next)).catch((e) => next(toError(e)));
 
 export function errorHandler(logger) {
   // eslint-disable-next-line no-unused-vars
@@ -25,7 +28,7 @@ export function errorHandler(logger) {
       return res.status(400).json({ error: { code: 'INVALID_JSON', message: 'Request body is not valid JSON' } });
     }
     const status = err.status || 500;
-    if (status >= 500) logger?.error('unhandled_error', { path: req.path, err: err.message, stack: err.stack });
+    if (status >= 500) logger?.error('unhandled_error', { method: req.method, path: req.path, err: err.message, stack: err.stack });
     res.status(status).json({ error: { code: err.code || 'INTERNAL', message: err.message, details: err.details } });
   };
 }

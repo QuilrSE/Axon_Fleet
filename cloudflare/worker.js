@@ -70,6 +70,12 @@ export default {
   },
 };
 
+// Log promise rejections nothing handled, with their reason (empty reasons included).
+globalThis.addEventListener?.('unhandledrejection', (ev) => {
+  const r = ev.reason;
+  console.error(JSON.stringify({ level: 'error', msg: 'unhandled_rejection', reason: r instanceof Error ? r.message : String(r), stack: r?.stack ?? null }));
+});
+
 /** Base class: lazily builds the service for this hostname, persists runtime config, pauses timers when idle. */
 class ServiceObject extends DurableObject {
   constructor(ctx, env) {
