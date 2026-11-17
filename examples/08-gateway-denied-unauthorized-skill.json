@@ -1,0 +1,85 @@
+{
+  "description": "Gateway rejects delete_inventory (not allowlisted for agent-a → agent-b)",
+  "request": {
+    "jsonrpc": "2.0",
+    "id": "rpc_b4315406c6b64833",
+    "method": "message/send",
+    "params": {
+      "metadata": {
+        "envelope": {
+          "task_id": "task_dd754440e5d74170",
+          "sender_agent_id": "agent-a",
+          "recipient_agent_id": "agent-b",
+          "skill": "delete_inventory",
+          "intent": "delete_all_inventory",
+          "payload": {
+            "confirm": true
+          },
+          "created_at": "2026-11-15T07:00:47.880Z",
+          "status": "submitted",
+          "correlation_id": "corr_6c2b36662440404e"
+        }
+      },
+      "message": {
+        "kind": "message",
+        "role": "user",
+        "messageId": "msg_9e72812efad947fe",
+        "contextId": "corr_6c2b36662440404e",
+        "taskId": "task_dd754440e5d74170",
+        "parts": [
+          {
+            "kind": "text",
+            "text": "delete_all_inventory (skill: delete_inventory)"
+          },
+          {
+            "kind": "data",
+            "data": {
+              "skill": "delete_inventory",
+              "intent": "delete_all_inventory",
+              "payload": {
+                "confirm": true
+              }
+            }
+          }
+        ]
+      }
+    }
+  },
+  "response": {
+    "status": 403,
+    "body": {
+      "jsonrpc": "2.0",
+      "id": "rpc_b4315406c6b64833",
+      "error": {
+        "code": -32011,
+        "message": "Skill authorization denied: skill 'delete_inventory' is not allowlisted for agent-a → agent-b",
+        "data": {
+          "requestId": "gwreq_0338c444eba94a2b",
+          "enforcedBy": "a2a-gateway",
+          "reason": "skill_not_allowlisted"
+        }
+      }
+    },
+    "gatewayRequestId": "gwreq_0338c444eba94a2b"
+  },
+  "probe": {
+    "id": "probe_1794726047882",
+    "at": "2026-11-15T07:00:47.882Z",
+    "type": "unauthorized_skill",
+    "mode": "gateway",
+    "gateway": "PoC A2A Gateway",
+    "description": "Invoke Agent B's hidden 'delete_inventory' skill (not allowlisted for agent-a)",
+    "outcome": "Blocked (HTTP 403)",
+    "blocked": true,
+    "calls": [
+      {
+        "httpStatus": 403,
+        "code": -32011,
+        "message": "Skill authorization denied: skill 'delete_inventory' is not allowlisted for agent-a → agent-b",
+        "gatewayRequestId": "gwreq_0338c444eba94a2b",
+        "blocked": true
+      }
+    ],
+    "totalCalls": 1
+  }
+}

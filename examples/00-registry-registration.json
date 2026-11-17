@@ -1,0 +1,59 @@
+{
+  "request": {
+    "method": "POST",
+    "url": "http://localhost:4000/registry/agents",
+    "headers": {
+      "authorization": "Bearer <agent gateway token>"
+    },
+    "body": {
+      "agentId": "agent-b",
+      "agentCardUrl": "http://localhost:4002/.well-known/agent-card.json",
+      "card": "<Agent Card — see agent-card-agent-b.json>"
+    }
+  },
+  "discovery": {
+    "query": {
+      "skill": "vehicle_service_orchestration"
+    },
+    "count": 1,
+    "agents": [
+      {
+        "agentId": "agent-b",
+        "name": "Synthetic Motors Service Orchestration Agent",
+        "description": "Dealership & service-center orchestration agent (fictional dealer network). Turns vehicle telemetry into a service assessment: diagnoses required parts, checks and reserves inventory, orders missing parts, and proposes a mechanic + service-bay appointment.",
+        "provider": "Synthetic Motors Dealer Network (fictional, PoC)",
+        "version": "0.1.0",
+        "url": "http://localhost:4002/a2a",
+        "agentCardUrl": "http://localhost:4002/.well-known/agent-card.json",
+        "skills": [
+          {
+            "id": "vehicle_service_orchestration",
+            "name": "Vehicle service orchestration",
+            "tags": [
+              "automotive",
+              "service",
+              "parts",
+              "inventory",
+              "scheduling",
+              "dealership"
+            ]
+          }
+        ],
+        "capabilities": {
+          "streaming": false,
+          "pushNotifications": true,
+          "extendedAgentCard": false
+        },
+        "health": {
+          "status": "healthy",
+          "checkedAt": "2026-11-15T07:00:47.580Z",
+          "httpStatus": 200,
+          "latencyMs": 16,
+          "gatewayMode": true
+        },
+        "registeredAt": "2026-11-15T07:00:47.551Z",
+        "updatedAt": "2026-11-15T07:00:47.551Z"
+      }
+    ]
+  }
+}

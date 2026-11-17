@@ -1,0 +1,32 @@
+{
+  "name": "axon-fleet",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Axon Fleet: governed A2A traffic between an in-vehicle agent and a dealership agent, through built-in, third-party (Bifrost, QuilrAI) or no gateway",
+  "type": "module",
+  "engines": {
+    "node": ">=20.10"
+  },
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "start": "node scripts/start-all.mjs",
+    "dev": "node scripts/start-all.mjs",
+    "start:gateway": "node packages/a2a-gateway/src/index.js",
+    "start:agent-a": "node packages/agent-a/src/index.js",
+    "start:agent-b": "node packages/agent-b/src/index.js",
+    "start:partner-gateway": "node packages/partner-gateway-mock/src/index.js",
+    "start:dashboard": "node packages/web-dashboard/src/server.js",
+    "test": "node --test --test-concurrency=1 tests/unit.test.js tests/integration.test.js tests/gateways.test.js tests/network.test.js tests/bifrost.test.js tests/headers.test.js tests/quilr.test.js",
+    "examples": "node scripts/capture-examples.mjs",
+    "reset": "node scripts/reset-runtime.mjs",
+    "cf:dev": "wrangler dev",
+    "cf:deploy": "wrangler deploy",
+    "cf:smoke": "node scripts/cf-smoke.mjs",
+    "cf:check": "wrangler deploy --dry-run --outdir .wrangler/dry-run"
+  },
+  "devDependencies": {
+    "wrangler": "^4.163.0"
+  }
+}

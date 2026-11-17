@@ -1,0 +1,304 @@
+{
+  "description": "A2A v1 push notification for the terminal state (StreamResponse.task with artifact)",
+  "body": {
+    "task": {
+      "id": "task_c3bc25df0e7e4c9a",
+      "contextId": "corr_9bc2c39bae974a2d",
+      "status": {
+        "state": "TASK_STATE_COMPLETED",
+        "message": {
+          "messageId": "msg_51f33e0095684c92",
+          "role": "ROLE_AGENT",
+          "parts": [
+            {
+              "text": "Service assessment complete — appointment proposed"
+            },
+            {
+              "data": {
+                "stage": "completed"
+              },
+              "mediaType": "application/json"
+            }
+          ]
+        },
+        "timestamp": "2026-11-15T07:00:47.840Z"
+      },
+      "artifacts": [
+        {
+          "artifactId": "art_5e8339ec4e6b4e9d",
+          "name": "service-assessment",
+          "description": "Service assessment, parts reservation/order status and proposed appointment",
+          "parts": [
+            {
+              "data": {
+                "kind": "service_assessment",
+                "vehicle": {
+                  "vehicleId": "veh-001",
+                  "vin": "SYNTH0EV0SEDAN001",
+                  "model": "Aurora E-Sedan (synthetic)"
+                },
+                "telemetrySummary": {
+                  "odometerKm": 28317,
+                  "batterySocPct": 70.2,
+                  "batterySohPct": 90.8,
+                  "drivetrainTempC": 70.7,
+                  "minTirePsi": 34.7,
+                  "brakePadWearPct": {
+                    "front": 91.9,
+                    "rear": 66.6
+                  },
+                  "faultCodes": []
+                },
+                "findings": [
+                  {
+                    "code": "BRAKE_FRONT_WEAR",
+                    "severity": "critical",
+                    "description": "Front brake pads 91.9% worn"
+                  }
+                ],
+                "requiredParts": [
+                  {
+                    "partNo": "BRK-PAD-FR",
+                    "qty": 1,
+                    "reasons": [
+                      "front pad wear"
+                    ]
+                  },
+                  {
+                    "partNo": "BRK-ROT-FR",
+                    "qty": 2,
+                    "reasons": [
+                      "rotor resurfacing limit likely exceeded"
+                    ]
+                  }
+                ],
+                "services": [
+                  {
+                    "skill": "brakes",
+                    "laborHours": 2,
+                    "description": "Front brake service"
+                  }
+                ],
+                "inventory": [
+                  {
+                    "partNo": "BRK-PAD-FR",
+                    "name": "Front brake pad set",
+                    "required": 1,
+                    "available": 6,
+                    "reservable": 1,
+                    "shortfall": 0,
+                    "leadTimeDays": 1,
+                    "unitPrice": 89,
+                    "status": "in_stock"
+                  },
+                  {
+                    "partNo": "BRK-ROT-FR",
+                    "name": "Front brake rotor",
+                    "required": 2,
+                    "available": 1,
+                    "reservable": 1,
+                    "shortfall": 1,
+                    "leadTimeDays": 1,
+                    "unitPrice": 74,
+                    "status": "partial"
+                  }
+                ],
+                "reservations": [
+                  {
+                    "reservationId": "rsv_bf795a6793984092",
+                    "taskId": "task_c3bc25df0e7e4c9a",
+                    "partNo": "BRK-PAD-FR",
+                    "name": "Front brake pad set",
+                    "qty": 1,
+                    "status": "reserved",
+                    "at": "2026-11-15T07:00:47.764Z"
+                  },
+                  {
+                    "reservationId": "rsv_bdc1fdfed95e4fc8",
+                    "taskId": "task_c3bc25df0e7e4c9a",
+                    "partNo": "BRK-ROT-FR",
+                    "name": "Front brake rotor",
+                    "qty": 1,
+                    "status": "reserved",
+                    "at": "2026-11-15T07:00:47.764Z"
+                  }
+                ],
+                "partsOrder": {
+                  "orderId": "PO-SYN-1001",
+                  "taskId": "task_c3bc25df0e7e4c9a",
+                  "vehicleId": "veh-001",
+                  "supplier": "SYN Parts Distribution (fictional)",
+                  "status": "placed",
+                  "lines": [
+                    {
+                      "partNo": "BRK-ROT-FR",
+                      "name": "Front brake rotor",
+                      "qty": 1,
+                      "leadTimeDays": 1,
+                      "eta": "2026-11-16",
+                      "unitPrice": 74
+                    }
+                  ],
+                  "eta": "2026-11-16",
+                  "createdAt": "2026-11-15T07:00:47.800Z",
+                  "statusHistory": [
+                    {
+                      "status": "placed",
+                      "at": "2026-11-15T07:00:47.800Z"
+                    }
+                  ]
+                },
+                "appointment": {
+                  "appointmentId": "appt_aa91d397504a4d2c",
+                  "taskId": "task_c3bc25df0e7e4c9a",
+                  "vehicleId": "veh-001",
+                  "start": "2026-11-17T09:00:00.000Z",
+                  "estDurationHours": 2,
+                  "mechanic": {
+                    "id": "MECH-03",
+                    "name": "Tech Casey (synthetic)"
+                  },
+                  "bay": {
+                    "id": "BAY-1",
+                    "name": "Bay 1, general"
+                  },
+                  "skillsCovered": [
+                    "brakes"
+                  ],
+                  "status": "proposed",
+                  "holdExpiresAt": "2026-11-16T07:00:47.835Z",
+                  "createdAt": "2026-11-15T07:00:47.835Z"
+                },
+                "estimate": {
+                  "partsCost": 237,
+                  "laborHours": 2,
+                  "laborCost": 190,
+                  "total": 427,
+                  "currency": "USD",
+                  "note": "Synthetic pricing"
+                },
+                "recommendation": "service_required",
+                "serviceCenter": {
+                  "id": "SYN-DLR-001",
+                  "name": "Synthetic Motors Service Center (fictional)"
+                },
+                "completedAt": "2026-11-15T07:00:47.840Z",
+                "synthetic": true
+              },
+              "mediaType": "application/json"
+            }
+          ]
+        }
+      ],
+      "metadata": {
+        "stage": "completed",
+        "stageHistory": [
+          {
+            "stage": "received",
+            "state": "submitted",
+            "at": "2026-11-15T07:00:47.660Z"
+          },
+          {
+            "stage": "diagnosed",
+            "state": "working",
+            "at": "2026-11-15T07:00:47.691Z"
+          },
+          {
+            "stage": "inventory_checked",
+            "state": "working",
+            "at": "2026-11-15T07:00:47.727Z"
+          },
+          {
+            "stage": "parts_reserved",
+            "state": "working",
+            "at": "2026-11-15T07:00:47.764Z"
+          },
+          {
+            "stage": "parts_ordered",
+            "state": "working",
+            "at": "2026-11-15T07:00:47.800Z"
+          },
+          {
+            "stage": "appointment_proposed",
+            "state": "working",
+            "at": "2026-11-15T07:00:47.836Z"
+          },
+          {
+            "stage": "completed",
+            "state": "completed",
+            "at": "2026-11-15T07:00:47.840Z"
+          }
+        ],
+        "envelope": {
+          "task_id": "task_c3bc25df0e7e4c9a",
+          "sender_agent_id": "agent-a",
+          "recipient_agent_id": "agent-b",
+          "skill": "vehicle_service_orchestration",
+          "intent": "service_assessment_and_parts_order",
+          "payload": {
+            "vehicle": {
+              "vehicleId": "veh-001",
+              "vin": "SYNTH0EV0SEDAN001",
+              "model": "Aurora E-Sedan (synthetic)",
+              "powertrain": "BEV"
+            },
+            "telemetry": {
+              "vehicleId": "veh-001",
+              "vin": "SYNTH0EV0SEDAN001",
+              "model": "Aurora E-Sedan (synthetic)",
+              "powertrain": "BEV",
+              "timestamp": "2026-11-15T07:00:47.637Z",
+              "odometerKm": 28317,
+              "batterySocPct": 70.2,
+              "batterySohPct": 90.8,
+              "drivetrainTempC": 70.7,
+              "ambientTempC": 28.8,
+              "tirePressurePsi": {
+                "fl": 35.2,
+                "fr": 35.6,
+                "rl": 34.7,
+                "rr": 34.8
+              },
+              "brakePadWearPct": {
+                "front": 91.9,
+                "rear": 66.6
+              },
+              "faultCodes": [],
+              "scenario": "brake_wear",
+              "synthetic": true,
+              "predictedMaintenance": [
+                "front brake pad replacement"
+              ]
+            },
+            "detectedIssues": [
+              {
+                "code": "BRAKE_FRONT",
+                "severity": "critical",
+                "title": "Front brake pads worn",
+                "detail": "91.9% wear (threshold 70%)",
+                "predictedService": "front brake pad replacement"
+              }
+            ],
+            "preferences": {
+              "preferredServiceCenter": "SYN-DLR-001",
+              "contact": "in-vehicle display",
+              "loanerRequested": false
+            }
+          },
+          "created_at": "2026-11-15T07:00:47.651Z",
+          "status": "submitted",
+          "correlation_id": "corr_9bc2c39bae974a2d"
+        },
+        "vehicleId": "veh-001",
+        "inbound": {
+          "via": "gateway",
+          "gateway": "PoC A2A Gateway",
+          "claimedSender": "agent-a",
+          "verifiedCaller": "agent-a",
+          "receivedAt": "2026-11-15T07:00:47.660Z"
+        },
+        "runtime": "DealerFlow"
+      }
+    }
+  }
+}

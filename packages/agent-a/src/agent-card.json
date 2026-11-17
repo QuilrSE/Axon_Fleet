@@ -1,0 +1,128 @@
+{
+  "name": "In-Vehicle Telemetry & Driver Assistant Agent",
+  "description": "In-vehicle client agent (synthetic vehicles). Generates and analyses telemetry, detects maintenance needs, and delegates service assessment and parts ordering to a dealership agent over A2A. Receives task status updates from service agents.",
+  "supportedInterfaces": [
+    {
+      "url": "{{BASE_URL}}/a2a",
+      "protocolBinding": "JSONRPC",
+      "protocolVersion": "1.0"
+    }
+  ],
+  "provider": {
+    "organization": "Synthetic Mobility Labs (fictional, PoC)",
+    "url": "https://example.com/synthetic-mobility"
+  },
+  "version": "{{VERSION}}",
+  "capabilities": {
+    "streaming": false,
+    "pushNotifications": false,
+    "extendedAgentCard": false
+  },
+  "securitySchemes": {
+    "bearer": {
+      "httpAuthSecurityScheme": {
+        "scheme": "Bearer",
+        "description": "Send 'Authorization: Bearer <token>'. Gateways present the forwarding token configured for them (for Bifrost: the request-authentication header set on the registration). Direct callers use the agent's direct API key, accepted only while the agent's A2A Gateway switch is off. Credentials are issued out of band and never published in this card."
+      }
+    }
+  },
+  "securityRequirements": [
+    {
+      "schemes": {
+        "bearer": []
+      }
+    }
+  ],
+  "defaultInputModes": [
+    "application/json"
+  ],
+  "defaultOutputModes": [
+    "application/json"
+  ],
+  "skills": [
+    {
+      "id": "service_status_updates",
+      "name": "Receive service task status updates",
+      "description": "Accepts A2A task status updates (tasks/pushNotification) for service requests this agent created.",
+      "tags": [
+        "automotive",
+        "status",
+        "callback",
+        "push-notification"
+      ],
+      "examples": [
+        "Task task_123 moved to parts_ordered"
+      ],
+      "inputModes": [
+        "application/json"
+      ],
+      "outputModes": [
+        "application/json"
+      ],
+      "x-poc-schemas": {
+        "input": {
+          "type": "object",
+          "required": [
+            "task"
+          ],
+          "properties": {
+            "task": {
+              "description": "A2A Task object"
+            }
+          }
+        },
+        "output": {
+          "type": "object",
+          "properties": {
+            "received": {
+              "type": "boolean"
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "vehicle_telemetry_query",
+      "name": "Vehicle telemetry query",
+      "description": "Returns the latest synthetic telemetry snapshot and detected maintenance alerts for a vehicle.",
+      "tags": [
+        "automotive",
+        "telemetry",
+        "diagnostics"
+      ],
+      "examples": [
+        "Latest telemetry for veh-001"
+      ],
+      "inputModes": [
+        "application/json"
+      ],
+      "outputModes": [
+        "application/json"
+      ],
+      "x-poc-schemas": {
+        "input": {
+          "type": "object",
+          "required": [
+            "vehicleId"
+          ]
+        },
+        "output": {
+          "type": "object",
+          "properties": {
+            "telemetry": {},
+            "alerts": {}
+          }
+        }
+      }
+    }
+  ],
+  "protocolVersion": "0.3.0",
+  "url": "{{BASE_URL}}/a2a",
+  "preferredTransport": "JSONRPC",
+  "additionalInterfaces": [
+    {
+      "url": "{{BASE_URL}}/a2a",
+      "transport": "JSONRPC"
+    }
+  ]
+}

@@ -1,0 +1,12 @@
+{
+  "name": "@axon-fleet/a2a-gateway",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "src/index.js",
+  "dependencies": {
+    "@axon-fleet/shared": "0.1.0",
+    "cors": "^2.8.5",
+    "express": "^4.21.2"
+  }
+}

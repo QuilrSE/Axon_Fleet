@@ -1,0 +1,73 @@
+/* WhiteMatter-inspired design tokens (local fallback — not an official WhiteMatter asset).
+   Neutral, high-contrast surfaces; one restrained accent ("signal") reserved for the routing path. */
+:root {
+  color-scheme: light;
+  --wm-canvas: #f3f4f6;
+  --wm-surface: #ffffff;
+  --wm-surface-sunk: #f8f9fa;
+  --wm-ink: #15171b;
+  --wm-ink-2: #3c424b;
+  --wm-slate: #5d6572;
+  --wm-hairline: #dcdfe4;
+  --wm-hairline-strong: #c4c9d1;
+  --wm-signal: #2340c8;
+  --wm-signal-soft: #e8ecfb;
+  --wm-secure: #17704a;
+  --wm-secure-soft: #e5f3ec;
+  --wm-bypass: #9a5800;
+  --wm-bypass-soft: #fdf1df;
+  --wm-danger: #b42318;
+  --wm-danger-soft: #fdecea;
+  --wm-info-soft: #eef0f3;
+
+  --wm-font: "Instrument Sans", "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --wm-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --wm-text-xs: 0.75rem;
+  --wm-text-sm: 0.8125rem;
+  --wm-text-md: 0.9375rem;
+  --wm-text-lg: 1.125rem;
+  --wm-text-xl: 1.5rem;
+  --wm-text-2xl: 2rem;
+
+  --wm-space-1: 4px; --wm-space-2: 8px; --wm-space-3: 12px; --wm-space-4: 16px;
+  --wm-space-5: 24px; --wm-space-6: 32px; --wm-space-7: 48px;
+  --wm-radius-sm: 6px;
+  --wm-radius-md: 10px;
+  --wm-radius-lg: 16px;
+  --wm-shadow: 0 1px 2px rgba(21, 23, 27, 0.05), 0 4px 16px rgba(21, 23, 27, 0.04);
+  --wm-focus: 0 0 0 3px rgba(35, 64, 200, 0.35);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --wm-canvas: #101215;
+    --wm-surface: #181b20;
+    --wm-surface-sunk: #14171b;
+    --wm-ink: #eef0f3;
+    --wm-ink-2: #c9ced6;
+    --wm-slate: #98a0ad;
+    --wm-hairline: #2a2f37;
+    --wm-hairline-strong: #3a414c;
+    --wm-signal: #8fa2ff;
+    --wm-signal-soft: #1f2645;
+    --wm-secure: #5cc996;
+    --wm-secure-soft: #12291f;
+    --wm-bypass: #f0b45a;
+    --wm-bypass-soft: #2e2311;
+    --wm-danger: #ff8a7f;
+    --wm-danger-soft: #331816;
+    --wm-info-soft: #22262d;
+    --wm-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+  }
+}
+:root {
+  --wm-signal-strong: #1a30a3;
+  --wm-hero-tint: linear-gradient(135deg, rgba(35, 64, 200, 0.06), rgba(35, 64, 200, 0) 55%);
+  --wm-ease: cubic-bezier(.2, .7, .2, 1);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --wm-signal-strong: #b6c3ff;
+    --wm-hero-tint: linear-gradient(135deg, rgba(143, 162, 255, 0.10), rgba(143, 162, 255, 0) 55%);
+  }
+}

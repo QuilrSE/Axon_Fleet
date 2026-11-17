@@ -1,0 +1,82 @@
+<!doctype html><html lang="en"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="/ds/tokens.css">
+<link rel="stylesheet" href="/ds/components.css">
+<script src="/config.js"></script>
+<title>Agent B · Dealership Orchestration Agent</title></head><body>
+<header class="wm-top">
+  <div class="wm-brand">Axon Fleet <span class="wm-env">Local PoC</span> <small>WhiteMatter-inspired design system</small></div>
+  <nav class="wm-nav" aria-label="Dashboards">
+    <a href="/">Overview</a>
+    <a href="/agent-a.html">Vehicle agent</a>
+    <a href="/agent-b.html" aria-current="page">Dealership agent</a>
+    <a href="/gateway.html">Gateway</a>
+  </nav>
+</header>
+<main class="wm-page">
+  <section class="wm-hero" aria-label="Agent identity">
+    <div class="wm-hero-id">
+      <div class="wm-avatar"><span data-icon="wrench" data-size="26"></span></div>
+      <h1>Dealership &amp; Service Center Orchestration Agent</h1>
+      <p>Receives telemetry-based service requests over A2A, runs them through its own DealerFlow runtime, and returns parts, order status and a proposed appointment.</p>
+      <div class="wm-hero-tags" id="heroTags"></div>
+    </div>
+    <div class="wm-hero-conn">
+      <h2><span data-icon="link"></span>Connection details</h2>
+      <div id="heroConn"></div>
+      <div id="heroEdit" style="display:grid;gap:8px"></div>
+    </div>
+  </section>
+  <div id="mode"></div>
+  <div class="wm-grid">
+    <div class="wm-stack">
+      <section class="wm-panel">
+        <h2 class="wm-h"><span class="tile"><span data-icon="list"></span></span>Incoming A2A tasks <span class="wm-count" id="taskCount"></span></h2>
+        <div id="tasks"></div>
+        <div id="taskDetail"></div>
+      </section>
+      <section class="wm-panel">
+        <h2 class="wm-h"><span class="tile"><span data-icon="box"></span></span>Parts inventory</h2>
+        <div id="inventory"></div>
+        <h3 class="wm-sub">Parts orders</h3>
+        <div id="orders"></div>
+      </section>
+      <section class="wm-panel">
+        <h2 class="wm-h"><span class="tile"><span data-icon="calendar"></span></span>Mechanic schedule &amp; service bays</h2>
+        <p class="wm-muted">Next three working days. Blue cells are slots held for proposed appointments.</p>
+        <div id="schedule"></div>
+        <h3 class="wm-sub">Proposed appointments</h3>
+        <div id="appointments"></div>
+      </section>
+      <section class="wm-panel">
+        <h2 class="wm-h"><span class="tile"><span data-icon="code"></span></span>Raw A2A request / response</h2>
+        <div id="exchanges"></div>
+      </section>
+    </div>
+    <aside class="wm-stack">
+      <section class="wm-panel">
+        <h2 class="wm-h"><span class="tile"><span data-icon="route"></span></span>A2A gateways</h2>
+        <div id="gwPanel"></div>
+      </section>
+      <section class="wm-panel">
+        <h2 class="wm-h"><span class="tile"><span data-icon="pulse"></span></span>Agent status</h2>
+        <div id="status"></div>
+        <div class="wm-row" style="margin-top:12px"><button class="wm-btn" id="resetData">Reset demo data</button></div>
+      </section>
+      <section class="wm-panel">
+        <h2 class="wm-h"><span class="tile"><span data-icon="shield"></span></span>Active security controls</h2>
+        <div id="controls"></div>
+      </section>
+      <section class="wm-panel">
+        <h2 class="wm-h"><span class="tile"><span data-icon="shield"></span></span>Security &amp; audit events</h2>
+        <div id="events"></div>
+      </section>
+    </aside>
+  </div>
+  <p class="wm-foot">Proof of concept. All vehicles, VINs, parts, prices and people are synthetic. Not affiliated with WhiteMatter.</p>
+</main>
+<script type="module" src="/js/agent-b.js"></script>
+</body></html>

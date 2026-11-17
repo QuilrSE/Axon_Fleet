@@ -1,0 +1,62 @@
+<!doctype html><html lang="en"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="/ds/tokens.css">
+<link rel="stylesheet" href="/ds/components.css">
+<script src="/config.js"></script>
+<title>A2A Gateway &amp; Agent Registry</title></head><body>
+<header class="wm-top">
+  <div class="wm-brand">Axon Fleet <span class="wm-env">Local PoC</span> <small>WhiteMatter-inspired design system</small></div>
+  <nav class="wm-nav" aria-label="Dashboards">
+    <a href="/">Overview</a>
+    <a href="/agent-a.html">Vehicle agent</a>
+    <a href="/agent-b.html">Dealership agent</a>
+    <a href="/gateway.html" aria-current="page">Gateway</a>
+  </nav>
+</header>
+<main class="wm-page">
+  <h1 class="wm-title">A2A Gateway &amp; Agent Registry</h1>
+  <p class="wm-lede">Every gateway-mediated call is authenticated, bound to the caller's identity, rate-limited, authorized per skill, routed through the registry and written to the audit trail.</p>
+  <div id="stats"></div>
+  <div class="wm-grid" style="margin-top:24px">
+    <div class="wm-stack">
+      <section class="wm-panel">
+        <h2 class="wm-h"><span class="tile"><span data-icon="route"></span></span>Message routing log</h2>
+        <div id="routes"></div>
+      </section>
+      <section class="wm-panel">
+        <h2 class="wm-h"><span class="tile"><span data-icon="shield"></span></span>Authentication &amp; authorization events</h2>
+        <div class="wm-row" style="margin-bottom:12px">
+          <label class="wm-field">Event type<select id="auditType" class="wm-select">
+            <option value="">All events</option><option value="a2a_request">A2A requests</option><option value="registration">Registration</option><option value="discovery">Discovery</option><option value="authentication">Authentication failures</option>
+          </select></label>
+          <button class="wm-btn quiet" id="clearLogs">Clear logs</button>
+        </div>
+        <div id="audit"></div>
+      </section>
+      <section class="wm-panel">
+        <h2 class="wm-h"><span class="tile"><span data-icon="list"></span></span>Recent A2A tasks</h2>
+        <div id="tasks"></div>
+      </section>
+    </div>
+    <aside class="wm-stack">
+      <section class="wm-panel">
+        <h2 class="wm-h"><span class="tile"><span data-icon="pulse"></span></span>Registered agents</h2>
+        <div id="agents"></div>
+      </section>
+      <section class="wm-panel">
+        <h2 class="wm-h"><span class="tile"><span data-icon="shield"></span></span>Gateway policy</h2>
+        <div id="policy"></div>
+      </section>
+      <section class="wm-panel">
+        <h2 class="wm-h"><span class="tile"><span data-icon="gauge"></span></span>Rate-limit events</h2>
+        <div id="ratelimits"></div>
+      </section>
+    </aside>
+  </div>
+  <p class="wm-foot">Proof of concept. Dashboard read APIs are unauthenticated for local development only.</p>
+</main>
+<script type="module" src="/js/gateway.js"></script>
+</body></html>

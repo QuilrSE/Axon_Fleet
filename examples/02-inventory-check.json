@@ -1,0 +1,202 @@
+{
+  "description": "Agent B → (gateway) → Agent A: tasks/pushNotification at stage 'inventory_checked'",
+  "request": {
+    "jsonrpc": "2.0",
+    "id": "rpc_b60c221f25364b71",
+    "method": "tasks/pushNotification",
+    "params": {
+      "metadata": {
+        "envelope": {
+          "task_id": "task_c3bc25df0e7e4c9a",
+          "sender_agent_id": "agent-b",
+          "recipient_agent_id": "agent-a",
+          "skill": "service_status_updates",
+          "intent": "task_status_update",
+          "payload": {
+            "task_id": "task_c3bc25df0e7e4c9a",
+            "state": "working",
+            "stage": "inventory_checked"
+          },
+          "created_at": "2026-11-15T07:00:47.727Z",
+          "status": "working",
+          "correlation_id": "corr_9bc2c39bae974a2d"
+        }
+      },
+      "message": {
+        "kind": "message",
+        "role": "agent",
+        "messageId": "msg_6333a8c31ab14952",
+        "contextId": "corr_9bc2c39bae974a2d",
+        "taskId": "task_c3bc25df0e7e4c9a",
+        "parts": [
+          {
+            "kind": "text",
+            "text": "task_status_update (skill: service_status_updates)"
+          },
+          {
+            "kind": "data",
+            "data": {
+              "skill": "service_status_updates",
+              "intent": "task_status_update",
+              "payload": {
+                "task_id": "task_c3bc25df0e7e4c9a",
+                "state": "working",
+                "stage": "inventory_checked"
+              }
+            }
+          }
+        ]
+      },
+      "task": {
+        "kind": "task",
+        "id": "task_c3bc25df0e7e4c9a",
+        "contextId": "corr_9bc2c39bae974a2d",
+        "status": {
+          "state": "working",
+          "timestamp": "2026-11-15T07:00:47.727Z",
+          "message": {
+            "kind": "message",
+            "role": "agent",
+            "messageId": "msg_373e4d949f2447ab",
+            "parts": [
+              {
+                "kind": "text",
+                "text": "Inventory checked: 1/2 line(s) fully in stock"
+              },
+              {
+                "kind": "data",
+                "data": {
+                  "stage": "inventory_checked",
+                  "inventory": [
+                    {
+                      "partNo": "BRK-PAD-FR",
+                      "name": "Front brake pad set",
+                      "required": 1,
+                      "available": 6,
+                      "reservable": 1,
+                      "shortfall": 0,
+                      "leadTimeDays": 1,
+                      "unitPrice": 89,
+                      "status": "in_stock"
+                    },
+                    {
+                      "partNo": "BRK-ROT-FR",
+                      "name": "Front brake rotor",
+                      "required": 2,
+                      "available": 1,
+                      "reservable": 1,
+                      "shortfall": 1,
+                      "leadTimeDays": 1,
+                      "unitPrice": 74,
+                      "status": "partial"
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        },
+        "artifacts": [],
+        "history": [],
+        "metadata": {
+          "stage": "inventory_checked",
+          "stageHistory": [
+            {
+              "stage": "received",
+              "state": "submitted",
+              "at": "2026-11-15T07:00:47.660Z"
+            },
+            {
+              "stage": "diagnosed",
+              "state": "working",
+              "at": "2026-11-15T07:00:47.691Z"
+            },
+            {
+              "stage": "inventory_checked",
+              "state": "working",
+              "at": "2026-11-15T07:00:47.727Z"
+            }
+          ],
+          "envelope": {
+            "task_id": "task_c3bc25df0e7e4c9a",
+            "sender_agent_id": "agent-a",
+            "recipient_agent_id": "agent-b",
+            "skill": "vehicle_service_orchestration",
+            "intent": "service_assessment_and_parts_order",
+            "payload": {
+              "vehicle": {
+                "vehicleId": "veh-001",
+                "vin": "SYNTH0EV0SEDAN001",
+                "model": "Aurora E-Sedan (synthetic)",
+                "powertrain": "BEV"
+              },
+              "telemetry": {
+                "vehicleId": "veh-001",
+                "vin": "SYNTH0EV0SEDAN001",
+                "model": "Aurora E-Sedan (synthetic)",
+                "powertrain": "BEV",
+                "timestamp": "2026-11-15T07:00:47.637Z",
+                "odometerKm": 28317,
+                "batterySocPct": 70.2,
+                "batterySohPct": 90.8,
+                "drivetrainTempC": 70.7,
+                "ambientTempC": 28.8,
+                "tirePressurePsi": {
+                  "fl": 35.2,
+                  "fr": 35.6,
+                  "rl": 34.7,
+                  "rr": 34.8
+                },
+                "brakePadWearPct": {
+                  "front": 91.9,
+                  "rear": 66.6
+                },
+                "faultCodes": [],
+                "scenario": "brake_wear",
+                "synthetic": true,
+                "predictedMaintenance": [
+                  "front brake pad replacement"
+                ]
+              },
+              "detectedIssues": [
+                {
+                  "code": "BRAKE_FRONT",
+                  "severity": "critical",
+                  "title": "Front brake pads worn",
+                  "detail": "91.9% wear (threshold 70%)",
+                  "predictedService": "front brake pad replacement"
+                }
+              ],
+              "preferences": {
+                "preferredServiceCenter": "SYN-DLR-001",
+                "contact": "in-vehicle display",
+                "loanerRequested": false
+              }
+            },
+            "created_at": "2026-11-15T07:00:47.651Z",
+            "status": "submitted",
+            "correlation_id": "corr_9bc2c39bae974a2d"
+          },
+          "vehicleId": "veh-001",
+          "inbound": {
+            "via": "gateway",
+            "gateway": "PoC A2A Gateway",
+            "claimedSender": "agent-a",
+            "verifiedCaller": "agent-a",
+            "receivedAt": "2026-11-15T07:00:47.660Z"
+          },
+          "runtime": "DealerFlow"
+        }
+      }
+    }
+  },
+  "response": {
+    "jsonrpc": "2.0",
+    "id": "rpc_b60c221f25364b71",
+    "result": {
+      "received": true,
+      "taskId": "task_c3bc25df0e7e4c9a",
+      "stage": "inventory_checked"
+    }
+  }
+}

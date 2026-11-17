@@ -1,0 +1,16 @@
+{
+  "description": "A2A v1 push notification (StreamResponse.statusUpdate) POSTed to the webhook",
+  "body": {
+    "statusUpdate": {
+      "taskId": "task_c3bc25df0e7e4c9a",
+      "contextId": "corr_9bc2c39bae974a2d",
+      "status": {
+        "state": "TASK_STATE_WORKING",
+        "timestamp": "2026-11-15T07:00:47.840Z"
+      },
+      "metadata": {
+        "stage": "parts_ordered"
+      }
+    }
+  }
+}

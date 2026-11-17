@@ -1,0 +1,35 @@
+<!doctype html><html lang="en"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="/ds/tokens.css">
+<link rel="stylesheet" href="/ds/components.css">
+<script src="/config.js"></script>
+<title>Axon Fleet</title></head><body>
+<header class="wm-top">
+  <div class="wm-brand">Axon Fleet <span class="wm-env">Local PoC</span> <small>WhiteMatter-inspired design system</small></div>
+  <nav class="wm-nav" aria-label="Dashboards">
+    <a href="/" aria-current="page">Overview</a>
+    <a href="/agent-a.html">Vehicle agent</a>
+    <a href="/agent-b.html">Dealership agent</a>
+    <a href="/gateway.html">Gateway</a>
+  </nav>
+</header>
+<main class="wm-page">
+  <h1 class="wm-title">Two agents, one gateway, one switch.</h1>
+  <p class="wm-lede">A vehicle agent and a dealership agent find each other through an A2A registry and work a telemetry-to-parts-order job together. Flip the A2A Gateway off in either dashboard to see what direct agent-to-agent traffic loses.</p>
+  <div id="overview"></div>
+  <section class="wm-panel" style="margin-top:24px">
+    <h2 class="wm-h"><span class="tile"><span data-icon="list"></span></span>Run the demo</h2>
+    <ol class="wm-timeline">
+      <li><div class="t">Open Agent A, pick “Brake-pad wear above threshold” and generate telemetry</div><div class="d">Agent A flags the issue locally.</div></li>
+      <li><div class="t">Send telemetry to the service agent</div><div class="d">Agent A discovers Agent B through the registry and creates an A2A task.</div></li>
+      <li><div class="t">Watch the task move from received to completed</div><div class="d">Agent B reserves parts, orders the shortfall and proposes a slot. Status updates flow back through the gateway.</div></li>
+      <li><div class="t">Run the security probes, then turn the A2A Gateway off in both dashboards</div><div class="d">Repeat the request and the probes. Compare the routing path, the controls list and the gateway audit log.</div></li>
+    </ol>
+    <p class="wm-muted">Full walkthrough: <span class="wm-code">docs/demo-script.md</span></p>
+  </section>
+</main>
+<script type="module" src="/js/overview.js"></script>
+</body></html>

@@ -1,0 +1,214 @@
+{
+  "description": "Agent B → (gateway) → Agent A: tasks/pushNotification at stage 'appointment_proposed'",
+  "request": {
+    "jsonrpc": "2.0",
+    "id": "rpc_64dcd09a7db043bd",
+    "method": "tasks/pushNotification",
+    "params": {
+      "metadata": {
+        "envelope": {
+          "task_id": "task_c3bc25df0e7e4c9a",
+          "sender_agent_id": "agent-b",
+          "recipient_agent_id": "agent-a",
+          "skill": "service_status_updates",
+          "intent": "task_status_update",
+          "payload": {
+            "task_id": "task_c3bc25df0e7e4c9a",
+            "state": "working",
+            "stage": "appointment_proposed"
+          },
+          "created_at": "2026-11-15T07:00:47.836Z",
+          "status": "working",
+          "correlation_id": "corr_9bc2c39bae974a2d"
+        }
+      },
+      "message": {
+        "kind": "message",
+        "role": "agent",
+        "messageId": "msg_a492c210a2ad4a3c",
+        "contextId": "corr_9bc2c39bae974a2d",
+        "taskId": "task_c3bc25df0e7e4c9a",
+        "parts": [
+          {
+            "kind": "text",
+            "text": "task_status_update (skill: service_status_updates)"
+          },
+          {
+            "kind": "data",
+            "data": {
+              "skill": "service_status_updates",
+              "intent": "task_status_update",
+              "payload": {
+                "task_id": "task_c3bc25df0e7e4c9a",
+                "state": "working",
+                "stage": "appointment_proposed"
+              }
+            }
+          }
+        ]
+      },
+      "task": {
+        "kind": "task",
+        "id": "task_c3bc25df0e7e4c9a",
+        "contextId": "corr_9bc2c39bae974a2d",
+        "status": {
+          "state": "working",
+          "timestamp": "2026-11-15T07:00:47.836Z",
+          "message": {
+            "kind": "message",
+            "role": "agent",
+            "messageId": "msg_62bdee0d14084c87",
+            "parts": [
+              {
+                "kind": "text",
+                "text": "Proposed 2026-11-17 09:00 with Tech Casey (synthetic) in Bay 1, general"
+              },
+              {
+                "kind": "data",
+                "data": {
+                  "stage": "appointment_proposed",
+                  "appointment": {
+                    "appointmentId": "appt_aa91d397504a4d2c",
+                    "taskId": "task_c3bc25df0e7e4c9a",
+                    "vehicleId": "veh-001",
+                    "start": "2026-11-17T09:00:00.000Z",
+                    "estDurationHours": 2,
+                    "mechanic": {
+                      "id": "MECH-03",
+                      "name": "Tech Casey (synthetic)"
+                    },
+                    "bay": {
+                      "id": "BAY-1",
+                      "name": "Bay 1, general"
+                    },
+                    "skillsCovered": [
+                      "brakes"
+                    ],
+                    "status": "proposed",
+                    "holdExpiresAt": "2026-11-16T07:00:47.835Z",
+                    "createdAt": "2026-11-15T07:00:47.835Z"
+                  }
+                }
+              }
+            ]
+          }
+        },
+        "artifacts": [],
+        "history": [],
+        "metadata": {
+          "stage": "appointment_proposed",
+          "stageHistory": [
+            {
+              "stage": "received",
+              "state": "submitted",
+              "at": "2026-11-15T07:00:47.660Z"
+            },
+            {
+              "stage": "diagnosed",
+              "state": "working",
+              "at": "2026-11-15T07:00:47.691Z"
+            },
+            {
+              "stage": "inventory_checked",
+              "state": "working",
+              "at": "2026-11-15T07:00:47.727Z"
+            },
+            {
+              "stage": "parts_reserved",
+              "state": "working",
+              "at": "2026-11-15T07:00:47.764Z"
+            },
+            {
+              "stage": "parts_ordered",
+              "state": "working",
+              "at": "2026-11-15T07:00:47.800Z"
+            },
+            {
+              "stage": "appointment_proposed",
+              "state": "working",
+              "at": "2026-11-15T07:00:47.836Z"
+            }
+          ],
+          "envelope": {
+            "task_id": "task_c3bc25df0e7e4c9a",
+            "sender_agent_id": "agent-a",
+            "recipient_agent_id": "agent-b",
+            "skill": "vehicle_service_orchestration",
+            "intent": "service_assessment_and_parts_order",
+            "payload": {
+              "vehicle": {
+                "vehicleId": "veh-001",
+                "vin": "SYNTH0EV0SEDAN001",
+                "model": "Aurora E-Sedan (synthetic)",
+                "powertrain": "BEV"
+              },
+              "telemetry": {
+                "vehicleId": "veh-001",
+                "vin": "SYNTH0EV0SEDAN001",
+                "model": "Aurora E-Sedan (synthetic)",
+                "powertrain": "BEV",
+                "timestamp": "2026-11-15T07:00:47.637Z",
+                "odometerKm": 28317,
+                "batterySocPct": 70.2,
+                "batterySohPct": 90.8,
+                "drivetrainTempC": 70.7,
+                "ambientTempC": 28.8,
+                "tirePressurePsi": {
+                  "fl": 35.2,
+                  "fr": 35.6,
+                  "rl": 34.7,
+                  "rr": 34.8
+                },
+                "brakePadWearPct": {
+                  "front": 91.9,
+                  "rear": 66.6
+                },
+                "faultCodes": [],
+                "scenario": "brake_wear",
+                "synthetic": true,
+                "predictedMaintenance": [
+                  "front brake pad replacement"
+                ]
+              },
+              "detectedIssues": [
+                {
+                  "code": "BRAKE_FRONT",
+                  "severity": "critical",
+                  "title": "Front brake pads worn",
+                  "detail": "91.9% wear (threshold 70%)",
+                  "predictedService": "front brake pad replacement"
+                }
+              ],
+              "preferences": {
+                "preferredServiceCenter": "SYN-DLR-001",
+                "contact": "in-vehicle display",
+                "loanerRequested": false
+              }
+            },
+            "created_at": "2026-11-15T07:00:47.651Z",
+            "status": "submitted",
+            "correlation_id": "corr_9bc2c39bae974a2d"
+          },
+          "vehicleId": "veh-001",
+          "inbound": {
+            "via": "gateway",
+            "gateway": "PoC A2A Gateway",
+            "claimedSender": "agent-a",
+            "verifiedCaller": "agent-a",
+            "receivedAt": "2026-11-15T07:00:47.660Z"
+          },
+          "runtime": "DealerFlow"
+        }
+      }
+    }
+  },
+  "response": {
+    "jsonrpc": "2.0",
+    "id": "rpc_64dcd09a7db043bd",
+    "result": {
+      "received": true,
+      "taskId": "task_c3bc25df0e7e4c9a",
+      "stage": "appointment_proposed"
+    }
+  }
+}

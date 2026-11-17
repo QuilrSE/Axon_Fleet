@@ -1,0 +1,213 @@
+{
+  "description": "Agent B → (gateway) → Agent A: tasks/pushNotification at stage 'parts_ordered'",
+  "request": {
+    "jsonrpc": "2.0",
+    "id": "rpc_594beea159274242",
+    "method": "tasks/pushNotification",
+    "params": {
+      "metadata": {
+        "envelope": {
+          "task_id": "task_c3bc25df0e7e4c9a",
+          "sender_agent_id": "agent-b",
+          "recipient_agent_id": "agent-a",
+          "skill": "service_status_updates",
+          "intent": "task_status_update",
+          "payload": {
+            "task_id": "task_c3bc25df0e7e4c9a",
+            "state": "working",
+            "stage": "parts_ordered"
+          },
+          "created_at": "2026-11-15T07:00:47.800Z",
+          "status": "working",
+          "correlation_id": "corr_9bc2c39bae974a2d"
+        }
+      },
+      "message": {
+        "kind": "message",
+        "role": "agent",
+        "messageId": "msg_cb2af64d6f954d68",
+        "contextId": "corr_9bc2c39bae974a2d",
+        "taskId": "task_c3bc25df0e7e4c9a",
+        "parts": [
+          {
+            "kind": "text",
+            "text": "task_status_update (skill: service_status_updates)"
+          },
+          {
+            "kind": "data",
+            "data": {
+              "skill": "service_status_updates",
+              "intent": "task_status_update",
+              "payload": {
+                "task_id": "task_c3bc25df0e7e4c9a",
+                "state": "working",
+                "stage": "parts_ordered"
+              }
+            }
+          }
+        ]
+      },
+      "task": {
+        "kind": "task",
+        "id": "task_c3bc25df0e7e4c9a",
+        "contextId": "corr_9bc2c39bae974a2d",
+        "status": {
+          "state": "working",
+          "timestamp": "2026-11-15T07:00:47.800Z",
+          "message": {
+            "kind": "message",
+            "role": "agent",
+            "messageId": "msg_ece88d638ec249ef",
+            "parts": [
+              {
+                "kind": "text",
+                "text": "Purchase order PO-SYN-1001 placed for 1 line(s), ETA 2026-11-16"
+              },
+              {
+                "kind": "data",
+                "data": {
+                  "stage": "parts_ordered",
+                  "partsOrder": {
+                    "orderId": "PO-SYN-1001",
+                    "taskId": "task_c3bc25df0e7e4c9a",
+                    "vehicleId": "veh-001",
+                    "supplier": "SYN Parts Distribution (fictional)",
+                    "status": "placed",
+                    "lines": [
+                      {
+                        "partNo": "BRK-ROT-FR",
+                        "name": "Front brake rotor",
+                        "qty": 1,
+                        "leadTimeDays": 1,
+                        "eta": "2026-11-16",
+                        "unitPrice": 74
+                      }
+                    ],
+                    "eta": "2026-11-16",
+                    "createdAt": "2026-11-15T07:00:47.800Z",
+                    "statusHistory": [
+                      {
+                        "status": "placed",
+                        "at": "2026-11-15T07:00:47.800Z"
+                      }
+                    ]
+                  }
+                }
+              }
+            ]
+          }
+        },
+        "artifacts": [],
+        "history": [],
+        "metadata": {
+          "stage": "parts_ordered",
+          "stageHistory": [
+            {
+              "stage": "received",
+              "state": "submitted",
+              "at": "2026-11-15T07:00:47.660Z"
+            },
+            {
+              "stage": "diagnosed",
+              "state": "working",
+              "at": "2026-11-15T07:00:47.691Z"
+            },
+            {
+              "stage": "inventory_checked",
+              "state": "working",
+              "at": "2026-11-15T07:00:47.727Z"
+            },
+            {
+              "stage": "parts_reserved",
+              "state": "working",
+              "at": "2026-11-15T07:00:47.764Z"
+            },
+            {
+              "stage": "parts_ordered",
+              "state": "working",
+              "at": "2026-11-15T07:00:47.800Z"
+            }
+          ],
+          "envelope": {
+            "task_id": "task_c3bc25df0e7e4c9a",
+            "sender_agent_id": "agent-a",
+            "recipient_agent_id": "agent-b",
+            "skill": "vehicle_service_orchestration",
+            "intent": "service_assessment_and_parts_order",
+            "payload": {
+              "vehicle": {
+                "vehicleId": "veh-001",
+                "vin": "SYNTH0EV0SEDAN001",
+                "model": "Aurora E-Sedan (synthetic)",
+                "powertrain": "BEV"
+              },
+              "telemetry": {
+                "vehicleId": "veh-001",
+                "vin": "SYNTH0EV0SEDAN001",
+                "model": "Aurora E-Sedan (synthetic)",
+                "powertrain": "BEV",
+                "timestamp": "2026-11-15T07:00:47.637Z",
+                "odometerKm": 28317,
+                "batterySocPct": 70.2,
+                "batterySohPct": 90.8,
+                "drivetrainTempC": 70.7,
+                "ambientTempC": 28.8,
+                "tirePressurePsi": {
+                  "fl": 35.2,
+                  "fr": 35.6,
+                  "rl": 34.7,
+                  "rr": 34.8
+                },
+                "brakePadWearPct": {
+                  "front": 91.9,
+                  "rear": 66.6
+                },
+                "faultCodes": [],
+                "scenario": "brake_wear",
+                "synthetic": true,
+                "predictedMaintenance": [
+                  "front brake pad replacement"
+                ]
+              },
+              "detectedIssues": [
+                {
+                  "code": "BRAKE_FRONT",
+                  "severity": "critical",
+                  "title": "Front brake pads worn",
+                  "detail": "91.9% wear (threshold 70%)",
+                  "predictedService": "front brake pad replacement"
+                }
+              ],
+              "preferences": {
+                "preferredServiceCenter": "SYN-DLR-001",
+                "contact": "in-vehicle display",
+                "loanerRequested": false
+              }
+            },
+            "created_at": "2026-11-15T07:00:47.651Z",
+            "status": "submitted",
+            "correlation_id": "corr_9bc2c39bae974a2d"
+          },
+          "vehicleId": "veh-001",
+          "inbound": {
+            "via": "gateway",
+            "gateway": "PoC A2A Gateway",
+            "claimedSender": "agent-a",
+            "verifiedCaller": "agent-a",
+            "receivedAt": "2026-11-15T07:00:47.660Z"
+          },
+          "runtime": "DealerFlow"
+        }
+      }
+    }
+  },
+  "response": {
+    "jsonrpc": "2.0",
+    "id": "rpc_594beea159274242",
+    "result": {
+      "received": true,
+      "taskId": "task_c3bc25df0e7e4c9a",
+      "stage": "parts_ordered"
+    }
+  }
+}

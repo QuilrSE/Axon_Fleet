@@ -1,0 +1,97 @@
+<!doctype html><html lang="en"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="/ds/tokens.css">
+<link rel="stylesheet" href="/ds/components.css">
+<script src="/config.js"></script>
+<title>Agent A · In-Vehicle Telemetry Agent</title></head><body>
+<header class="wm-top">
+  <div class="wm-brand">Axon Fleet <span class="wm-env">Local PoC</span> <small>WhiteMatter-inspired design system</small></div>
+  <nav class="wm-nav" aria-label="Dashboards">
+    <a href="/">Overview</a>
+    <a href="/agent-a.html" aria-current="page">Vehicle agent</a>
+    <a href="/agent-b.html">Dealership agent</a>
+    <a href="/gateway.html">Gateway</a>
+  </nav>
+</header>
+<main class="wm-page">
+  <section class="wm-hero" aria-label="Agent identity">
+    <div class="wm-hero-id">
+      <div class="wm-avatar"><span data-icon="car" data-size="26"></span></div>
+      <h1>In-Vehicle Telemetry &amp; Driver Assistant Agent</h1>
+      <p>Watches synthetic vehicle telemetry, flags maintenance needs, and asks the dealership agent to assess the vehicle and order parts over A2A.</p>
+      <div class="wm-hero-tags" id="heroTags"></div>
+    </div>
+    <div class="wm-hero-conn">
+      <h2><span data-icon="link"></span>Connection details</h2>
+      <div id="heroConn"></div>
+      <div id="heroEdit" style="display:grid;gap:8px"></div>
+    </div>
+  </section>
+  <div id="mode"></div>
+  <div class="wm-grid">
+    <div class="wm-stack">
+      <section class="wm-panel">
+        <h2 class="wm-h"><span class="tile"><span data-icon="gauge"></span></span>Vehicle telemetry</h2>
+        <div class="wm-row" style="margin-bottom:16px">
+          <label class="wm-field">Vehicle<select id="vehicle" class="wm-select"></select></label>
+          <label class="wm-field">Telemetry scenario<select id="scenario" class="wm-select"></select></label>
+          <button class="wm-btn" id="gen">Generate telemetry</button>
+          <button class="wm-btn primary" id="send">Send Telemetry to Service Agent</button>
+        </div>
+        <div id="telemetry"></div>
+        <h3 class="wm-sub">Detected maintenance alerts</h3>
+        <div id="alerts"></div>
+        <h3 class="wm-sub">Telemetry history</h3>
+        <div id="history"></div>
+      </section>
+      <section class="wm-panel">
+        <h2 class="wm-h"><span class="tile"><span data-icon="list"></span></span>Service tasks <span class="wm-count" id="taskCount"></span></h2>
+        <div id="tasks"></div>
+        <div id="taskDetail"></div>
+      </section>
+      <section class="wm-panel">
+        <h2 class="wm-h"><span class="tile"><span data-icon="code"></span></span>Raw A2A request / response</h2>
+        <p class="wm-muted">Newest first. Gateway-routed calls carry an <span class="wm-code">x-gateway-request-id</span> you can find in the gateway audit log.</p>
+        <div id="exchanges"></div>
+      </section>
+    </div>
+    <aside class="wm-stack">
+      <section class="wm-panel">
+        <h2 class="wm-h"><span class="tile"><span data-icon="route"></span></span>A2A gateways</h2>
+        <div id="gwPanel"></div>
+      </section>
+      <section class="wm-panel">
+        <h2 class="wm-h"><span class="tile"><span data-icon="pulse"></span></span>Agent status</h2>
+        <div id="status"></div>
+      </section>
+      <section class="wm-panel">
+        <h2 class="wm-h"><span class="tile"><span data-icon="shield"></span></span>Active security controls</h2>
+        <div id="controls"></div>
+      </section>
+      <section class="wm-panel">
+        <h2 class="wm-h"><span class="tile"><span data-icon="alert"></span></span>Security probes</h2>
+        <p class="wm-muted">Run the same attack in each mode and compare the outcome.</p>
+        <div class="wm-row" id="probeButtons">
+          <button class="wm-btn" data-probe="unauthorized_skill">Unauthorized skill</button>
+          <button class="wm-btn" data-probe="invalid_token">Invalid token</button>
+          <button class="wm-btn" data-probe="spoofed_sender">Spoofed sender</button>
+          <button class="wm-btn" data-probe="rate_limit_burst">Rate-limit burst</button>
+        </div>
+        <div id="probes" style="margin-top:12px"></div>
+      </section>
+      <section class="wm-panel">
+        <h2 class="wm-h"><span class="tile"><span data-icon="shield"></span></span>Security &amp; audit events</h2>
+        <h3 class="wm-sub" style="margin-top:0">PoC gateway audit (agent-a)</h3>
+        <div id="central"></div>
+        <h3 class="wm-sub">Agent-local events</h3>
+        <div id="events"></div>
+      </section>
+    </aside>
+  </div>
+  <p class="wm-foot">Proof of concept. All vehicles, VINs, parts, prices and people are synthetic. Not affiliated with WhiteMatter.</p>
+</main>
+<script type="module" src="/js/agent-a.js"></script>
+</body></html>

@@ -1,0 +1,250 @@
+{
+  "description": "Agent A → (gateway) → Agent B: message/send for skill vehicle_service_orchestration",
+  "request": {
+    "jsonrpc": "2.0",
+    "id": "rpc_339cda3947eb45ee",
+    "method": "message/send",
+    "params": {
+      "metadata": {
+        "envelope": {
+          "task_id": "task_c3bc25df0e7e4c9a",
+          "sender_agent_id": "agent-a",
+          "recipient_agent_id": "agent-b",
+          "skill": "vehicle_service_orchestration",
+          "intent": "service_assessment_and_parts_order",
+          "payload": {
+            "vehicle": {
+              "vehicleId": "veh-001",
+              "vin": "SYNTH0EV0SEDAN001",
+              "model": "Aurora E-Sedan (synthetic)",
+              "powertrain": "BEV"
+            },
+            "telemetry": {
+              "vehicleId": "veh-001",
+              "vin": "SYNTH0EV0SEDAN001",
+              "model": "Aurora E-Sedan (synthetic)",
+              "powertrain": "BEV",
+              "timestamp": "2026-11-15T07:00:47.637Z",
+              "odometerKm": 28317,
+              "batterySocPct": 70.2,
+              "batterySohPct": 90.8,
+              "drivetrainTempC": 70.7,
+              "ambientTempC": 28.8,
+              "tirePressurePsi": {
+                "fl": 35.2,
+                "fr": 35.6,
+                "rl": 34.7,
+                "rr": 34.8
+              },
+              "brakePadWearPct": {
+                "front": 91.9,
+                "rear": 66.6
+              },
+              "faultCodes": [],
+              "scenario": "brake_wear",
+              "synthetic": true,
+              "predictedMaintenance": [
+                "front brake pad replacement"
+              ]
+            },
+            "detectedIssues": [
+              {
+                "code": "BRAKE_FRONT",
+                "severity": "critical",
+                "title": "Front brake pads worn",
+                "detail": "91.9% wear (threshold 70%)",
+                "predictedService": "front brake pad replacement"
+              }
+            ],
+            "preferences": {
+              "preferredServiceCenter": "SYN-DLR-001",
+              "contact": "in-vehicle display",
+              "loanerRequested": false
+            }
+          },
+          "created_at": "2026-11-15T07:00:47.651Z",
+          "status": "submitted",
+          "correlation_id": "corr_9bc2c39bae974a2d"
+        }
+      },
+      "message": {
+        "kind": "message",
+        "role": "user",
+        "messageId": "msg_454e8e416ec44a25",
+        "contextId": "corr_9bc2c39bae974a2d",
+        "taskId": "task_c3bc25df0e7e4c9a",
+        "parts": [
+          {
+            "kind": "text",
+            "text": "service_assessment_and_parts_order (skill: vehicle_service_orchestration)"
+          },
+          {
+            "kind": "data",
+            "data": {
+              "skill": "vehicle_service_orchestration",
+              "intent": "service_assessment_and_parts_order",
+              "payload": {
+                "vehicle": {
+                  "vehicleId": "veh-001",
+                  "vin": "SYNTH0EV0SEDAN001",
+                  "model": "Aurora E-Sedan (synthetic)",
+                  "powertrain": "BEV"
+                },
+                "telemetry": {
+                  "vehicleId": "veh-001",
+                  "vin": "SYNTH0EV0SEDAN001",
+                  "model": "Aurora E-Sedan (synthetic)",
+                  "powertrain": "BEV",
+                  "timestamp": "2026-11-15T07:00:47.637Z",
+                  "odometerKm": 28317,
+                  "batterySocPct": 70.2,
+                  "batterySohPct": 90.8,
+                  "drivetrainTempC": 70.7,
+                  "ambientTempC": 28.8,
+                  "tirePressurePsi": {
+                    "fl": 35.2,
+                    "fr": 35.6,
+                    "rl": 34.7,
+                    "rr": 34.8
+                  },
+                  "brakePadWearPct": {
+                    "front": 91.9,
+                    "rear": 66.6
+                  },
+                  "faultCodes": [],
+                  "scenario": "brake_wear",
+                  "synthetic": true,
+                  "predictedMaintenance": [
+                    "front brake pad replacement"
+                  ]
+                },
+                "detectedIssues": [
+                  {
+                    "code": "BRAKE_FRONT",
+                    "severity": "critical",
+                    "title": "Front brake pads worn",
+                    "detail": "91.9% wear (threshold 70%)",
+                    "predictedService": "front brake pad replacement"
+                  }
+                ],
+                "preferences": {
+                  "preferredServiceCenter": "SYN-DLR-001",
+                  "contact": "in-vehicle display",
+                  "loanerRequested": false
+                }
+              }
+            }
+          }
+        ]
+      },
+      "configuration": {
+        "acceptedOutputModes": [
+          "application/json"
+        ],
+        "blocking": false,
+        "pushNotificationConfig": {
+          "url": "http://localhost:4001/a2a",
+          "authentication": {
+            "schemes": [
+              "Bearer"
+            ]
+          }
+        }
+      }
+    }
+  },
+  "response": {
+    "jsonrpc": "2.0",
+    "id": "rpc_339cda3947eb45ee",
+    "result": {
+      "kind": "task",
+      "id": "task_c3bc25df0e7e4c9a",
+      "contextId": "corr_9bc2c39bae974a2d",
+      "status": {
+        "state": "submitted",
+        "timestamp": "2026-11-15T07:00:47.660Z"
+      },
+      "artifacts": [],
+      "history": [],
+      "metadata": {
+        "stage": "received",
+        "stageHistory": [
+          {
+            "stage": "received",
+            "state": "submitted",
+            "at": "2026-11-15T07:00:47.660Z"
+          }
+        ],
+        "envelope": {
+          "task_id": "task_c3bc25df0e7e4c9a",
+          "sender_agent_id": "agent-a",
+          "recipient_agent_id": "agent-b",
+          "skill": "vehicle_service_orchestration",
+          "intent": "service_assessment_and_parts_order",
+          "payload": {
+            "vehicle": {
+              "vehicleId": "veh-001",
+              "vin": "SYNTH0EV0SEDAN001",
+              "model": "Aurora E-Sedan (synthetic)",
+              "powertrain": "BEV"
+            },
+            "telemetry": {
+              "vehicleId": "veh-001",
+              "vin": "SYNTH0EV0SEDAN001",
+              "model": "Aurora E-Sedan (synthetic)",
+              "powertrain": "BEV",
+              "timestamp": "2026-11-15T07:00:47.637Z",
+              "odometerKm": 28317,
+              "batterySocPct": 70.2,
+              "batterySohPct": 90.8,
+              "drivetrainTempC": 70.7,
+              "ambientTempC": 28.8,
+              "tirePressurePsi": {
+                "fl": 35.2,
+                "fr": 35.6,
+                "rl": 34.7,
+                "rr": 34.8
+              },
+              "brakePadWearPct": {
+                "front": 91.9,
+                "rear": 66.6
+              },
+              "faultCodes": [],
+              "scenario": "brake_wear",
+              "synthetic": true,
+              "predictedMaintenance": [
+                "front brake pad replacement"
+              ]
+            },
+            "detectedIssues": [
+              {
+                "code": "BRAKE_FRONT",
+                "severity": "critical",
+                "title": "Front brake pads worn",
+                "detail": "91.9% wear (threshold 70%)",
+                "predictedService": "front brake pad replacement"
+              }
+            ],
+            "preferences": {
+              "preferredServiceCenter": "SYN-DLR-001",
+              "contact": "in-vehicle display",
+              "loanerRequested": false
+            }
+          },
+          "created_at": "2026-11-15T07:00:47.651Z",
+          "status": "submitted",
+          "correlation_id": "corr_9bc2c39bae974a2d"
+        },
+        "vehicleId": "veh-001",
+        "inbound": {
+          "via": "gateway",
+          "gateway": "PoC A2A Gateway",
+          "claimedSender": "agent-a",
+          "verifiedCaller": "agent-a",
+          "receivedAt": "2026-11-15T07:00:47.660Z"
+        },
+        "runtime": "DealerFlow"
+      }
+    }
+  }
+}

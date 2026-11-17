@@ -1,0 +1,82 @@
+# Runs all four services on one bridge network.
+# Agents talk to each other via container hostnames; the browser reaches them via localhost ports.
+x-common-env: &common-env
+  AUTH_MODE: static
+  GATEWAY_AGENT_TOKENS: agent-a:poc-gw-token-agent-a,agent-b:poc-gw-token-agent-b
+  GATEWAY_FORWARD_TOKEN: poc-gw-forward-token
+  AGENT_A_DIRECT_API_KEY: poc-direct-key-agent-a
+  AGENT_B_DIRECT_API_KEY: poc-direct-key-agent-b
+  GATEWAY_URL: http://a2a-gateway:4000
+  AGENT_A_PUBLIC_URL: http://agent-a:4001
+  AGENT_B_PUBLIC_URL: http://agent-b:4002
+  AGENT_B_CARD_URL: http://agent-b:4002/.well-known/agent-card.json
+  PARTNER_GATEWAY_FORWARD_TOKEN: partner-forward-token
+  BIFROST_VIRTUAL_KEY: ${BIFROST_VIRTUAL_KEY:-}
+  BIFROST_FORWARD_TOKEN: ${BIFROST_FORWARD_TOKEN:-bifrost-forward-token}
+  BIFROST_SETUP_TOKEN: ${BIFROST_SETUP_TOKEN:-}
+  BIFROST_ADMIN_CREDENTIALS: ${BIFROST_ADMIN_CREDENTIALS:-}
+  BIFROST_MANAGEMENT_KEY: ${BIFROST_MANAGEMENT_KEY:-}
+  AGENT_A_PARTNER_GATEWAY_KEY: partner-key-agent-a
+  AGENT_B_PARTNER_GATEWAY_KEY: partner-key-agent-b
+  CORS_ORIGINS: "*"
+  LOG_LEVEL: info
+
+services:
+  a2a-gateway:
+    build: .
+    command: ["node", "packages/a2a-gateway/src/index.js"]
+    environment:
+      <<: *common-env
+      GATEWAY_PORT: 4000
+      RATE_LIMIT_MAX: 20
+      RATE_LIMIT_WINDOW_MS: 10000
+    ports: ["4000:4000"]
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:4000/health"]
+      interval: 5s
+      retries: 10
+
+  partner-gateway:
+    # Mock third-party gateway. In the dashboard, add it with URL http://partner-gateway:4100
+    build: .
+    command: ["node", "packages/partner-gateway-mock/src/index.js"]
+    environment:
+      <<: *common-env
+      PARTNER_GATEWAY_PORT: 4100
+      PARTNER_GATEWAY_API_KEYS: agent-a:partner-key-agent-a,agent-b:partner-key-agent-b
+    ports: ["4100:4100"]
+
+  agent-b:
+    build: .
+    command: ["node", "packages/agent-b/src/index.js"]
+    extra_hosts: ["host.docker.internal:host-gateway"]   # reach gateways running on the host machine
+    environment:
+      <<: *common-env
+      AGENT_B_PORT: 4002
+      AGENT_B_GATEWAY_TOKEN: poc-gw-token-agent-b
+      AGENT_B_STEP_DELAY_MS: 900
+    ports: ["4002:4002"]
+    depends_on: [a2a-gateway]
+
+  agent-a:
+    build: .
+    command: ["node", "packages/agent-a/src/index.js"]
+    extra_hosts: ["host.docker.internal:host-gateway"]
+    environment:
+      <<: *common-env
+      AGENT_A_PORT: 4001
+      AGENT_A_GATEWAY_TOKEN: poc-gw-token-agent-a
+      TELEMETRY_SEED: 42
+    ports: ["4001:4001"]
+    depends_on: [a2a-gateway, agent-b]
+
+  web-dashboard:
+    build: .
+    command: ["node", "packages/web-dashboard/src/server.js"]
+    environment:
+      DASHBOARD_PORT: 5173
+      DASHBOARD_AGENT_A_URL: http://localhost:4001
+      DASHBOARD_AGENT_B_URL: http://localhost:4002
+      DASHBOARD_GATEWAY_URL: http://localhost:4000
+    ports: ["5173:5173"]
+    depends_on: [agent-a, agent-b, a2a-gateway]

@@ -1,0 +1,119 @@
+{
+  "name": "Synthetic Motors Service Orchestration Agent",
+  "description": "Dealership & service-center orchestration agent (fictional dealer network). Turns vehicle telemetry into a service assessment: diagnoses required parts, checks and reserves inventory, orders missing parts, and proposes a mechanic + service-bay appointment.",
+  "supportedInterfaces": [
+    {
+      "url": "http://localhost:4002/a2a",
+      "protocolBinding": "JSONRPC",
+      "protocolVersion": "1.0"
+    }
+  ],
+  "provider": {
+    "organization": "Synthetic Motors Dealer Network (fictional, PoC)",
+    "url": "https://example.com/synthetic-motors"
+  },
+  "version": "0.1.0",
+  "capabilities": {
+    "streaming": false,
+    "pushNotifications": true,
+    "extendedAgentCard": false
+  },
+  "securitySchemes": {
+    "bearer": {
+      "httpAuthSecurityScheme": {
+        "scheme": "Bearer",
+        "description": "Send 'Authorization: Bearer <token>'. Gateways present the forwarding token configured for them (for Bifrost: the request-authentication header set on the registration). Direct callers use the agent's direct API key, accepted only while the agent's A2A Gateway switch is off. Credentials are issued out of band and never published in this card."
+      }
+    }
+  },
+  "securityRequirements": [
+    {
+      "schemes": {
+        "bearer": []
+      }
+    }
+  ],
+  "defaultInputModes": [
+    "application/json",
+    "text/plain"
+  ],
+  "defaultOutputModes": [
+    "application/json"
+  ],
+  "skills": [
+    {
+      "id": "vehicle_service_orchestration",
+      "name": "Vehicle service orchestration",
+      "description": "Accepts a telemetry-based service request, determines required parts, reserves stock, orders shortfalls and proposes a service appointment. Long-running: returns a Task and pushes status updates.",
+      "tags": [
+        "automotive",
+        "service",
+        "parts",
+        "inventory",
+        "scheduling",
+        "dealership"
+      ],
+      "examples": [
+        "Front brake pads at 91% wear on VIN SYNTH0EV0SEDAN001 — assess and book service",
+        "Drivetrain overheating with fault P0C73 — reserve parts and propose a slot"
+      ],
+      "inputModes": [
+        "application/json"
+      ],
+      "outputModes": [
+        "application/json"
+      ],
+      "x-poc-schemas": {
+        "input": {
+          "type": "object",
+          "required": [
+            "vehicle",
+            "telemetry"
+          ],
+          "properties": {
+            "vehicle": {
+              "type": "object",
+              "required": [
+                "vehicleId",
+                "vin"
+              ]
+            },
+            "telemetry": {
+              "type": "object",
+              "description": "See TELEMETRY_SCHEMA in packages/shared/src/telemetry/schemas.js"
+            },
+            "detectedIssues": {
+              "type": "array"
+            },
+            "preferences": {
+              "type": "object"
+            }
+          }
+        },
+        "output": {
+          "type": "object",
+          "description": "Task artifact 'service-assessment'",
+          "properties": {
+            "findings": {},
+            "requiredParts": {},
+            "inventory": {},
+            "reservations": {},
+            "partsOrder": {},
+            "appointment": {},
+            "estimate": {},
+            "recommendation": {}
+          }
+        }
+      }
+    }
+  ],
+  "protocolVersion": "0.3.0",
+  "url": "http://localhost:4002/a2a",
+  "preferredTransport": "JSONRPC",
+  "additionalInterfaces": [
+    {
+      "url": "http://localhost:4002/a2a",
+      "transport": "JSONRPC"
+    }
+  ]
+}

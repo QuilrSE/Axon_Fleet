@@ -1,0 +1,63 @@
+// Cloudflare Workers configuration. Import this repository in the Cloudflare dashboard
+// (Workers & Pages → Create → Import a repository); the defaults (npx wrangler deploy) work as-is.
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "axon-fleet",
+  "main": "cloudflare/worker.js",
+  "compatibility_date": "2026-11-01",
+  "compatibility_flags": ["nodejs_compat"],
+
+  // Dashboard (static HTML/CSS/JS). Requests that are not files fall through to the Worker.
+  // html_handling "none": /agent-a.html must not redirect to /agent-a, which is the agent's service path.
+  "assets": { "directory": "./packages/web-dashboard/public", "binding": "ASSETS", "html_handling": "none" },
+
+  // One Durable Object per service; SQLite-backed classes also work on the Workers Free plan.
+  "durable_objects": {
+    "bindings": [
+      { "name": "GATEWAY", "class_name": "GatewayService" },
+      { "name": "AGENT_A", "class_name": "AgentAService" },
+      { "name": "AGENT_B", "class_name": "AgentBService" },
+      { "name": "PARTNER", "class_name": "PartnerGatewayService" }
+    ]
+  },
+  "migrations": [
+    { "tag": "v1", "new_sqlite_classes": ["GatewayService", "AgentAService", "AgentBService", "PartnerGatewayService"] }
+  ],
+
+  // The Node.js services run unchanged through these Fetch-API stand-ins.
+  "alias": {
+    "express": "./cloudflare/shims/express.js",
+    "cors": "./cloudflare/shims/cors.js",
+    "undici": "./cloudflare/shims/undici.js"
+  },
+
+  "observability": { "enabled": true },
+
+  // DEMO VALUES ONLY. For anything beyond a demo, delete these and set them as encrypted
+  // Secrets (Worker → Settings → Variables and Secrets) or with `npx wrangler secret put NAME`.
+  "vars": {
+    "AUTH_MODE": "static",
+    "GATEWAY_AGENT_TOKENS": "agent-a:poc-gw-token-agent-a,agent-b:poc-gw-token-agent-b",
+    "AGENT_A_GATEWAY_TOKEN": "poc-gw-token-agent-a",
+    "AGENT_B_GATEWAY_TOKEN": "poc-gw-token-agent-b",
+    "GATEWAY_FORWARD_TOKEN": "poc-gw-forward-token",
+    "AGENT_A_DIRECT_API_KEY": "poc-direct-key-agent-a",
+    "AGENT_B_DIRECT_API_KEY": "poc-direct-key-agent-b",
+    "PARTNER_GATEWAY_API_KEYS": "agent-a:partner-key-agent-a,agent-b:partner-key-agent-b",
+    "PARTNER_GATEWAY_FORWARD_TOKEN": "partner-forward-token",
+    "AGENT_A_PARTNER_GATEWAY_KEY": "partner-key-agent-a",
+    "AGENT_B_PARTNER_GATEWAY_KEY": "partner-key-agent-b",
+    "BIFROST_FORWARD_TOKEN": "bifrost-forward-token",
+    "RATE_LIMIT_MAX": "20",
+    "RATE_LIMIT_WINDOW_MS": "10000",
+    "HEALTH_CHECK_INTERVAL_MS": "15000",
+    "REGISTRATION_INTERVAL_MS": "30000",
+    "AGENT_B_STEP_DELAY_MS": "900",
+    "TELEMETRY_SEED": "42",
+    "GATEWAY_DEFAULT_ENABLED": "true",
+    "AGENT_CARD_FORMAT": "dual",
+    "DASHBOARD_ALLOW_SECRET_REVEAL": "true",
+    "CORS_ORIGINS": "*",
+    "LOG_LEVEL": "info"
+  }
+}
