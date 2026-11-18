@@ -63,8 +63,8 @@ export function buildA2ARoutes({ cfg, agent, tasks, gateway, getCard, exchanges,
               reason: inbound.reason,
               severity: inbound.via === 'direct' ? 'warning' : 'info',
               detail: inbound.via === 'direct'
-                ? `Direct call: sender '${env.sender_agent_id}' is self-asserted and unverified; no central authz, rate limit or audit`
-                : (inbound.verifiedCaller ? `Gateway verified caller '${inbound.verifiedCaller}'` : `Forwarded by ${inbound.gateway?.name ?? 'gateway'}; caller identity not supplied by the gateway`),
+                ? `Direct call from '${env.sender_agent_id}': no central authorization, rate limit or audit`
+                : `Received via ${inbound.gateway?.name ?? 'gateway'} from '${inbound.verifiedCaller ?? env.sender_agent_id}'`,
               taskId: wo.workOrderId,
             });
             return reply(200, rpcResult(body.id, agent.submitWorkOrder(wo)));

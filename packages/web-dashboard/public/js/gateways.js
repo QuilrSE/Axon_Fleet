@@ -90,15 +90,15 @@ export async function initGatewayPanel({ baseUrl, hostId = 'gwPanel', refresh })
           <label class="wm-check"><input type="checkbox" name="allowByDefault" checked> Allow any virtual key to call this agent</label>
         </fieldset>
 
-        <fieldset id="gwQuilr" class="wm-fs">
-          <legend>QuilrAI A2A Gateway</legend>
-          <p class="wm-help">Address: <span class="wm-code">https://&lt;host&gt;/a2a/&lt;org&gt;</span>; pasting an agent URL from the Quilr console fills it in. Agents are registered by an admin in the Quilr console; the caller key (Callers → keys, shown once) goes in <em>Agent → gateway</em> as a Bearer token or the <span class="wm-code">X-Quilr-A2A-Key</span> header, and the gateway → agent header must equal the agent's <em>outbound auth</em> in Quilr.</p>
+        <fieldset id="gwWhitematter" class="wm-fs">
+          <legend>Whitematter A2A Gateway</legend>
+          <p class="wm-help">Address: <span class="wm-code">https://&lt;host&gt;/a2a/&lt;org&gt;</span>; pasting an agent URL from the Whitematter console fills it in. Agents are registered by an admin in the Whitematter console; the caller key (Callers → keys, shown once) goes in <em>Agent → gateway</em> as a Bearer token, and the gateway → agent header must equal the agent's <em>outbound auth</em> in Whitematter.</p>
           <div class="two">
-            <label class="wm-field">Agent A slug in Quilr<input class="wm-input wm-code" data-slug="agent-a" placeholder="in-vehicle-telemetry-driver-assistant-agent" spellcheck="false"></label>
-            <label class="wm-field">Agent B slug in Quilr<input class="wm-input wm-code" data-slug="agent-b" placeholder="synthetic-motors-service-orchestration-agent" spellcheck="false"></label>
+            <label class="wm-field">Agent A slug in Whitematter<input class="wm-input wm-code" data-slug="agent-a" placeholder="in-vehicle-telemetry-driver-assistant-agent" spellcheck="false"></label>
+            <label class="wm-field">Agent B slug in Whitematter<input class="wm-input wm-code" data-slug="agent-b" placeholder="synthetic-motors-service-orchestration-agent" spellcheck="false"></label>
           </div>
           <label class="wm-field">Push notifications<select class="wm-select" name="pushMode">
-            <option value="auto">Auto: attach a webhook only when this agent is on public HTTPS (Quilr's rule); otherwise poll</option>
+            <option value="auto">Auto: attach a webhook only when this agent is on public HTTPS (Whitematter's rule); otherwise poll</option>
             <option value="on">Always attach a webhook</option>
             <option value="off">Never attach a webhook (poll GetTask)</option>
           </select></label>
@@ -145,7 +145,7 @@ export async function initGatewayPanel({ baseUrl, hostId = 'gwPanel', refresh })
 
   const form = document.getElementById('gwForm');
   $f('preset').addEventListener('change', (e) => { const p = meta.presets[e.target.value]; if (p) fillForm(p, false); });
-  $f('kind').addEventListener('change', () => { syncKind(); absorbQuilrSlug(); schedulePreview(); });
+  $f('kind').addEventListener('change', () => { syncKind(); absorbWhitematterSlug(); schedulePreview(); });
   form.addEventListener('input', schedulePreview);
   form.addEventListener('change', () => { syncModes(); schedulePreview(); });
   form.addEventListener('click', (e) => {
@@ -156,9 +156,9 @@ export async function initGatewayPanel({ baseUrl, hostId = 'gwPanel', refresh })
   });
   document.querySelector('#gwForm .wm-seg').addEventListener('click', (e) => { const b = e.target.closest('[data-scheme]'); if (b) setScheme(b.dataset.scheme); });
   $f('url').addEventListener('input', previewUrl);
-  // Detect a pasted Quilr agent URL only on paste / leaving the field, never mid-typing.
-  $f('url').addEventListener('paste', () => setTimeout(() => { absorbQuilrSlug(); previewUrl(); schedulePreview(); }, 0));
-  $f('url').addEventListener('change', () => { absorbQuilrSlug(); previewUrl(); schedulePreview(); });
+  // Detect a pasted Whitematter agent URL only on paste / leaving the field, never mid-typing.
+  $f('url').addEventListener('paste', () => setTimeout(() => { absorbWhitematterSlug(); previewUrl(); schedulePreview(); }, 0));
+  $f('url').addEventListener('change', () => { absorbWhitematterSlug(); previewUrl(); schedulePreview(); });
   document.getElementById('gwAddHeader').addEventListener('click', () => { addHeaderRow(); schedulePreview(); });
   document.getElementById('gwClear').addEventListener('click', () => clearForm());
   form.addEventListener('submit', submit);
@@ -187,9 +187,9 @@ function setScheme(next) {
   schedulePreview();
 }
 const SLUG_HINTS = { 'agent-a': /telemetry|vehicle|driver/i, 'agent-b': /dealer|service|orchestrat|motors/i };
-/** QuilrAI: an agent (or card) URL pasted into the address → org base + the agent's slug. */
-function absorbQuilrSlug() {
-  if ($f('kind').value !== 'quilr') return;
+/** Whitematter: an agent (or card) URL pasted into the address → org base + the agent's slug. */
+function absorbWhitematterSlug() {
+  if ($f('kind').value !== 'whitematter') return;
   const input = $f('url');
   const m = /^(.*?\/a2a\/[^/\s]+)\/([^/\s]+?)(?:\/\.well-known\/agent(?:-card)?\.json)?\/?$/.exec(input.value.trim());
   if (!m || ['catalog', '.well-known'].includes(m[2])) return;
@@ -197,7 +197,7 @@ function absorbQuilrSlug() {
   const target = Object.keys(SLUG_HINTS).find((k) => SLUG_HINTS[k].test(m[2])) ?? 'agent-b';
   const field = document.querySelector(`#gwForm [data-slug="${target}"]`);
   if (!field.value) field.value = m[2];
-  toast(`Detected Quilr agent slug "${m[2]}" (set as the ${target === 'agent-a' ? 'Agent A' : 'Agent B'} slug).`);
+  toast(`Detected Whitematter agent slug "${m[2]}" (set as the ${target === 'agent-a' ? 'Agent A' : 'Agent B'} slug).`);
 }
 
 function previewUrl() {
@@ -239,11 +239,11 @@ function syncKind() {
   const kind = $f('kind').value;
   document.getElementById('gwMapping').style.display = kind === 'generic' ? '' : 'none';
   document.getElementById('gwBifrost').style.display = kind === 'bifrost' ? '' : 'none';
-  document.getElementById('gwQuilr').style.display = kind === 'quilr' ? '' : 'none';
-  document.getElementById('callerRow').style.display = ['bifrost', 'quilr'].includes(kind) ? 'none' : '';
+  document.getElementById('gwWhitematter').style.display = kind === 'whitematter' ? '' : 'none';
+  document.getElementById('callerRow').style.display = ['bifrost', 'whitematter'].includes(kind) ? 'none' : '';
   const reg = $f('registerEnabled').closest('label');
-  reg.lastChild.textContent = kind === 'quilr' ? " Verify this agent is registered in Quilr (the caller key needs a grant for it)" : " Register this agent's card with the gateway";
-  if (kind === 'quilr' && !$f('pushMode').value) $f('pushMode').value = 'auto';
+  reg.lastChild.textContent = kind === 'whitematter' ? " Verify this agent is registered in Whitematter (the caller key needs a grant for it)" : " Register this agent's card with the gateway";
+  if (kind === 'whitematter' && !$f('pushMode').value) $f('pushMode').value = 'auto';
   if (kind === 'bifrost' && !$f('authHeader').value) $f('authHeader').value = 'x-bf-vk';
   syncModes();
 }
@@ -271,7 +271,7 @@ function fillForm(p, editing) {
   for (const h of p.extraHeaders ?? []) addHeaderRow(h, editing);
   const map = Object.fromEntries(String(p.agentNames ?? '').split(',').map((x) => x.split('=').map((y) => y.trim())).filter((x) => x.length === 2));
   for (const el of f.querySelectorAll('[data-slug]')) el.value = map[el.dataset.slug] ?? '';
-  if (p.kind === 'quilr') f.elements.pushMode.value = p.pushMode ?? 'auto';
+  if (p.kind === 'whitematter') f.elements.pushMode.value = p.pushMode ?? 'auto';
   document.getElementById('gwFormTitle').textContent = editing ? `Edit ${p.name}` : 'Add a gateway';
   document.getElementById('gwSubmit').textContent = editing ? 'Save changes' : 'Save gateway';
   document.getElementById('gwFormWrap').open = true;
@@ -301,7 +301,7 @@ function formBody() {
   else for (const k of MAPPING) delete body[k];
   if (body.kind === 'bifrost') body.allowByDefault = f.elements.allowByDefault.checked;
   else { delete body.managementAuthScheme; delete body.managementCredential; delete body.managementHeaderName; }
-  if (body.kind === 'quilr') {
+  if (body.kind === 'whitematter') {
     body.agentNames = [...f.querySelectorAll('[data-slug]')].filter((el) => el.value.trim()).map((el) => `${el.dataset.slug}=${el.value.trim()}`).join(',');
   } else { delete body.pushMode; if (body.kind !== 'bifrost') delete body.agentNames; }
   if (body.authScheme === 'bearer') delete body.authHeader;
@@ -435,7 +435,7 @@ export function renderGatewayList(gateways, gatewayEnabled) {
       <dl class="wm-hdrsummary">
         <div><dt>Agent → gateway</dt><dd>${outName ? `<span class="wm-code">${esc(outName)}: ${esc(g.authScheme === 'bearer' ? `Bearer ${g.credential}` : g.credential)}</span>` : 'none'}${(g.extraHeaders ?? []).map((h) => `<br><span class="wm-code">${esc(h.name)}: ${esc(h.value)}</span>`).join('')}</dd></div>
         <div><dt>Gateway → agent</dt><dd>${inName ? `<span class="wm-code">${esc(inName)}: ${esc(g.inboundCredential)}</span>` : 'not configured: requests from this gateway are rejected'}</dd></div>
-        ${g.kind === 'quilr' ? `<div><dt>Quilr agents</dt><dd>${esc(g.agentNames || 'slugs = agent IDs')}</dd></div><div><dt>Push</dt><dd>${esc({ auto: 'auto (public HTTPS only, else polling)', on: 'always', off: 'off (polling)' }[g.pushMode ?? 'auto'])}</dd></div>` : ''}
+        ${g.kind === 'whitematter' ? `<div><dt>Whitematter agents</dt><dd>${esc(g.agentNames || 'slugs = agent IDs')}</dd></div><div><dt>Push</dt><dd>${esc({ auto: 'auto (public HTTPS only, else polling)', on: 'always', off: 'off (polling)' }[g.pushMode ?? 'auto'])}</dd></div>` : ''}
         ${g.kind === 'bifrost' ? `<div><dt>Registration</dt><dd>${esc((meta?.managementAuth ?? {})[g.managementAuthScheme] ?? g.managementAuthScheme)}${g.managementAuthScheme === 'header' ? ` <span class="wm-code">${esc(g.managementHeaderName)}</span>` : ''}</dd></div>` : ''}
       </dl>
       ${g.registration.mode === 'management-api' && g.registration.action ? `<div class="wm-muted">Bifrost registration "${esc(g.registration.bifrostName ?? '')}": ${esc(g.registration.action)} at ${esc(time(g.registration.at))}</div>` : ''}

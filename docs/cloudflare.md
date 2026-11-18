@@ -48,7 +48,7 @@ npm run cf:deploy          # = wrangler deploy
 
 ### Worker name
 
-The Worker is named `axon-fleet` (`name` in `wrangler.jsonc`; the dashboard project must use the same name). To use another name, change both. A Worker under a new name is a new Worker: a new `*.workers.dev` URL, fresh Durable Object storage (gateway entries and settings start empty), and agent card URLs that external gateways such as Quilr or Bifrost must be updated to.
+The Worker is named `axon-fleet` (`name` in `wrangler.jsonc`; the dashboard project must use the same name). To use another name, change both. A Worker under a new name is a new Worker: a new `*.workers.dev` URL, fresh Durable Object storage (gateway entries and settings start empty), and agent card URLs that external gateways such as Whitematter or Bifrost must be updated to.
 
 ## Configuration and secrets
 
@@ -83,9 +83,9 @@ Then:
 
 For a long-lived setup, use a named Cloudflare Tunnel or host Bifrost on a public address.
 
-## Connecting the QuilrAI A2A Gateway
+## Connecting the Whitematter A2A Gateway
 
-Quilr only calls agents over public HTTPS, so the Cloudflare deployment is the natural home for agents behind Quilr. Register `https://<worker>/agent-b/.well-known/agent-card.json` in the Quilr console, then add the *QuilrAI A2A Gateway* template on both dashboards. Step by step: [quilr.md](quilr.md).
+Whitematter only calls agents over public HTTPS, so the Cloudflare deployment is the natural home for agents behind Whitematter. Register `https://<worker>/agent-b/.well-known/agent-card.json` in the Whitematter console, then add the *Whitematter A2A Gateway* template on both dashboards. Step by step: [whitematter.md](whitematter.md).
 
 ## What differs from the Node.js version
 

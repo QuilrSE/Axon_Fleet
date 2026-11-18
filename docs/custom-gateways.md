@@ -96,7 +96,7 @@ To route an end-to-end flow through a different gateway, configure it on **both*
 
 Placeholders: `{agentId}`, `{skill}`, `{tag}`. Empty query parameters are dropped.
 
-Set **Wire protocol** to *A2A v1.0* for gateways that require v1 method names. For Bifrost and QuilrAI use their dedicated gateway types instead ([bifrost.md](bifrost.md), [quilr.md](quilr.md)).
+Set **Wire protocol** to *A2A v1.0* for gateways that require v1 method names. For Bifrost and Whitematter use their dedicated gateway types instead ([bifrost.md](bifrost.md), [whitematter.md](whitematter.md)).
 
 | Field | Meaning | Built-in default | Generic default |
 |---|---|---|---|

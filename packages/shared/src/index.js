@@ -23,3 +23,4 @@ export * from './a2a/v1.js';
 export * from './a2a/v1Server.js';
 export * from './a2a/gatewayHeaders.js';
 export * from './a2a/curl.js';
+export * from './a2a/whitematterProtocol.js';

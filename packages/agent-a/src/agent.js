@@ -1,5 +1,5 @@
 // Agent A core: telemetry → local analysis → discover dealer agent → A2A task → track status.
-import { createEnvelope, toJsonRpc, METHODS, nowIso, RingBuffer, HttpError } from '@axon-fleet/shared';
+import { createEnvelope, toJsonRpc, METHODS, nowIso, RingBuffer, HttpError, WM_REQUEST_ID_HEADER } from '@axon-fleet/shared';
 import { SERVICE_SKILL } from './gatewayConfig.js';
 
 const dataOf = (msg) => msg?.parts?.find((p) => p.kind === 'data')?.data ?? null;
@@ -62,7 +62,7 @@ export class VehicleAgent {
       rec.error = (typeof e === 'string' ? e : e?.message) ?? `HTTP ${res.status}`;
       rec.timeline.push({ at: nowIso(), stage: 'send_failed', state: 'failed', text: rec.error, via: mode });
     } else {
-      // Gateways such as QuilrAI issue their own task/context IDs: track the task under the returned ID.
+      // Gateways such as Whitematter issue their own task/context IDs: track the task under the returned ID.
       const issued = res.data.result?.id;
       if (issued && issued !== rec.taskId) {
         this.tasks.delete(rec.taskId);
@@ -71,7 +71,7 @@ export class VehicleAgent {
         this.tasks.set(issued, rec);
       }
       if (res.data.result?.contextId) rec.contextId = res.data.result.contextId;
-      rec.gatewayRequestId = res.headers?.['x-quilr-request-id'] ?? res.headers?.['x-gateway-request-id'] ?? null;
+      rec.gatewayRequestId = res.headers?.[WM_REQUEST_ID_HEADER] ?? res.headers?.['x-gateway-request-id'] ?? null;
       this.#apply(rec, res.data.result, mode);
       if (rec.protocol === 'a2a-v1') this.#poll(rec);
     }

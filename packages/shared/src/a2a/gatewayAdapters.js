@@ -14,6 +14,7 @@ import crypto from 'node:crypto';
 import { fetchJson } from '../utils/http.js';
 import { resolveSecret, outboundAuth, outboundHeaders, managementHeaders, inboundAuth } from './gatewayHeaders.js';
 import { createEnvelope, toJsonRpc } from './message.js';
+import { WM_KEY_HEADER, WM_REQUEST_ID_HEADER, WM_ERROR_CODE_FIELD } from './whitematterProtocol.js';
 
 /** fetchJson + a hook that records exactly what was sent (for "equivalent curl"). */
 function makeSender(onRequest) {
@@ -26,8 +27,8 @@ function makeSender(onRequest) {
 
 export const GATEWAY_KINDS = Object.freeze({
   'poc-gateway': 'PoC A2A Gateway (this repository)',
-  bifrost: 'Bifrost Agent Gateway (A2A v1)',
-  quilr: 'QuilrAI A2A Gateway',
+  bifrost: 'Dummy A2A Gateway',
+  whitematter: 'Whitematter A2A Gateway',
   generic: 'Third-party A2A gateway (configurable mapping)',
 });
 export const PROTOCOLS = Object.freeze({ poc: 'PoC JSON-RPC (A2A v0.3 method names)', 'a2a-v1': 'A2A v1.0 (SendMessage, GetTask, …)' });
@@ -75,8 +76,8 @@ export const KIND_DEFAULTS = Object.freeze({
     invokePath: '/agents/{agentId}/a2a', healthPath: '/health', resultsPath: '', agentIdField: '',
     declaredControls: ['authentication'],
   },
-  quilr: {
-    authScheme: 'bearer', authHeader: 'X-Quilr-A2A-Key', callerHeader: '', protocol: 'a2a-v1',
+  whitematter: {
+    authScheme: 'bearer', authHeader: WM_KEY_HEADER, callerHeader: '', protocol: 'a2a-v1',
     registerMethod: 'GET', registerPath: '', registerBody: 'cardUrl', deregisterPath: '',
     discoverPath: '/catalog', invokePath: '/{agentName}', healthPath: '/catalog', resultsPath: '', agentIdField: '',
     agentNames: '', inboundHeaderName: 'Authorization', registerEnabled: false, pushMode: 'auto',
@@ -142,7 +143,7 @@ export function parseAgentNames(str = '') {
 
 export function createGatewayAdapter(profile, opts = {}) {
   if (profile.kind === 'bifrost') return createBifrostAdapter(profile, opts);
-  if (profile.kind === 'quilr') return createQuilrAdapter(profile, opts);
+  if (profile.kind === 'whitematter') return createWhitematterAdapter(profile, opts);
   return createGenericAdapter(profile, opts);
 }
 
@@ -341,43 +342,43 @@ function createBifrostAdapter(profile, { timeoutMs = 6000, onRequest } = {}) {
   };
 }
 
-// ── QuilrAI A2A Gateway ──────────────────────────────────────────────────────────────
-// Docs: docs.quilrai.dev/a2a-gateway/get-started/a2a-gateway
+// ── Whitematter A2A Gateway ──────────────────────────────────────────────────────────────
+// Docs: docs.whitematterai.dev/a2a-gateway/get-started/a2a-gateway
 //   Base URL  https://<host>/a2a/{org}; each agent at /a2a/{org}/{agent-slug}
-//   Caller key on EVERY request: Authorization: Bearer sk-quilr-a2a-…  or  X-Quilr-A2A-Key: sk-quilr-a2a-…
+//   Caller key on EVERY request: Authorization: Bearer <key>, or the caller-key header (WM_KEY_HEADER)
 //   POST /{slug} (JSON-RPC, A2A 1.0 via A2A-Version), GET /{slug}/.well-known/agent-card.json, GET /catalog
-//   Agents are registered by an admin in the Quilr console (no self-registration API).
-//   Gateway errors use -31xxx with error.data.quilr_error_code; every response has X-Quilr-Request-Id.
-export const QUILR_ERRORS = Object.freeze({
-  a2a_unauthenticated: 'The caller key is missing, invalid, expired or disabled (or a required user token is missing). Send it as "Authorization: Bearer sk-quilr-a2a-…" or "X-Quilr-A2A-Key".',
-  a2a_forbidden: 'The caller\'s grant does not allow this method or skill, or the source IP is not allowed. Check the grant on the caller in the Quilr console (and message.metadata.skill_id for skill-routed agents).',
+//   Agents are registered by an admin in the Whitematter console (no self-registration API).
+//   Gateway errors use -31xxx with an error-code field (WM_ERROR_CODE_FIELD); every response carries a request ID (WM_REQUEST_ID_HEADER).
+export const WHITEMATTER_ERRORS = Object.freeze({
+  a2a_unauthenticated: 'The caller key is missing, invalid, expired or disabled (or a required user token is missing). Send it as "Authorization: Bearer <caller key>" or in the gateway\'s caller-key header.',
+  a2a_forbidden: 'The caller\'s grant does not allow this method or skill, or the source IP is not allowed. Check the grant on the caller in the Whitematter console (and message.metadata.skill_id for skill-routed agents).',
   a2a_agent_not_found: 'Unknown or disabled agent, or this caller key has no grant for it (agents without a grant are invisible). Check the slug and the caller\'s grants.',
-  a2a_card_unapproved: 'The agent has no approved card, or its card changed and is blocked until an admin approves the new version (Quilr console → Agents → pending changes).',
+  a2a_card_unapproved: 'The agent has no approved card, or its card changed and is blocked until an admin approves the new version (Whitematter console → Agents → pending changes).',
   a2a_rate_limited: 'A rate, concurrency or open-task limit was reached; retry after the Retry-After interval.',
-  a2a_blocked_by_dlp: 'Quilr DLP blocked the request, response, stream or push update.',
-  a2a_upstream_error: 'Quilr could not reach the agent or got an invalid response. Quilr only calls agents over HTTPS on public addresses: check the card URL and the agent\'s outbound auth.',
+  a2a_blocked_by_dlp: 'Whitematter DLP blocked the request, response, stream or push update.',
+  a2a_upstream_error: 'Whitematter could not reach the agent or got an invalid response. Whitematter only calls agents over HTTPS on public addresses: check the card URL and the agent\'s outbound auth.',
   a2a_unavailable: 'The A2A gateway is off on this deployment or temporarily unavailable; retry later.',
   a2a_upstream_timeout: 'The agent did not answer in time.',
-  a2a_chain_limit: 'Delegation chain too deep, a loop, or a required X-Quilr-A2A-Chain token is missing.',
+  a2a_chain_limit: 'Delegation chain too deep, a loop, or a required delegation-chain token is missing.',
 });
-const QUILR_BY_CODE = { '-31401': 'a2a_unauthenticated', '-31403': 'a2a_forbidden', '-31404': 'a2a_agent_not_found', '-31409': 'a2a_card_unapproved', '-31429': 'a2a_rate_limited', '-31451': 'a2a_blocked_by_dlp', '-31502': 'a2a_upstream_error', '-31503': 'a2a_unavailable', '-31504': 'a2a_upstream_timeout', '-31508': 'a2a_chain_limit' };
+const WHITEMATTER_BY_CODE = { '-31401': 'a2a_unauthenticated', '-31403': 'a2a_forbidden', '-31404': 'a2a_agent_not_found', '-31409': 'a2a_card_unapproved', '-31429': 'a2a_rate_limited', '-31451': 'a2a_blocked_by_dlp', '-31502': 'a2a_upstream_error', '-31503': 'a2a_unavailable', '-31504': 'a2a_upstream_timeout', '-31508': 'a2a_chain_limit' };
 
-/** Turn any Quilr error body (JSON-RPC -31xxx or google.rpc-style HTTP error) into one actionable line. */
-export function explainQuilrError(res) {
+/** Turn any Whitematter error body (JSON-RPC -31xxx or google.rpc-style HTTP error) into one actionable line. */
+export function explainWhitematterError(res) {
   const d = res?.data ?? {};
   const e = d.error ?? {};
   const detail = (e.details ?? []).find((x) => x?.metadata) ?? {};
-  const code = e.data?.quilr_error_code ?? detail.metadata?.quilr_error_code ?? QUILR_BY_CODE[String(e.code)] ?? (String(detail.reason ?? '').toLowerCase() || null);
-  const requestId = e.data?.request_id ?? detail.metadata?.request_id ?? res?.headers?.['x-quilr-request-id'] ?? null;
+  const code = e.data?.[WM_ERROR_CODE_FIELD] ?? detail.metadata?.[WM_ERROR_CODE_FIELD] ?? WHITEMATTER_BY_CODE[String(e.code)] ?? (String(detail.reason ?? '').toLowerCase() || null);
+  const requestId = e.data?.request_id ?? detail.metadata?.request_id ?? res?.headers?.[WM_REQUEST_ID_HEADER] ?? null;
   const reason = e.data?.reason ? ` (${e.data.reason})` : '';
   const original = e.message ?? (typeof e === 'string' ? e : null) ?? `HTTP ${res?.status}`;
-  if (e.code === -32003) return { code: 'push_not_enabled', message: 'Push notifications are not enabled for this Quilr organization (-32003).', requestId };
-  const hint = code && QUILR_ERRORS[code] ? `${QUILR_ERRORS[code]}${reason}` : original;
-  return { code, message: `${hint}${code && QUILR_ERRORS[code] ? ` Quilr said: ${original}.` : ''}${requestId ? ` X-Quilr-Request-Id: ${requestId}` : ''}`, requestId };
+  if (e.code === -32003) return { code: 'push_not_enabled', message: 'Push notifications are not enabled for this Whitematter organization (-32003).', requestId };
+  const hint = code && WHITEMATTER_ERRORS[code] ? `${WHITEMATTER_ERRORS[code]}${reason}` : original;
+  return { code, message: `${hint}${code && WHITEMATTER_ERRORS[code] ? ` Whitematter said: ${original}.` : ''}${requestId ? ` Gateway request ID: ${requestId}` : ''}`, requestId };
 }
 
 /** Accept a base URL, an agent URL or an agent card URL; return { base, slug } (base = …/a2a/{org}). */
-export function parseQuilrUrl(url) {
+export function parseWhitematterUrl(url) {
   const u = new URL(url);
   const m = /^(.*?\/a2a\/[^/]+)(?:\/([^/]+))?(?:\/\.well-known\/agent(?:-card)?\.json)?\/?$/.exec(u.pathname);
   if (!m) return { base: url.replace(/\/+$/, ''), slug: null };
@@ -385,16 +386,16 @@ export function parseQuilrUrl(url) {
   return { base: `${u.origin}${m[1]}`, slug };
 }
 
-function createQuilrAdapter(profile, { timeoutMs = 8000, onRequest } = {}) {
+function createWhitematterAdapter(profile, { timeoutMs = 8000, onRequest } = {}) {
   const p = withKindDefaults(profile);
   const send = makeSender(onRequest);
-  const { base } = parseQuilrUrl(p.url);
+  const { base } = parseWhitematterUrl(p.url);
   const names = parseAgentNames(p.agentNames);
   const nameOf = (agentId) => names[agentId] ?? agentId;
   const idOf = (slug) => Object.entries(names).find(([, n]) => n === slug)?.[0] ?? slug;
   const keyHeaders = (override) => outboundHeaders(p, override);
   const cardUrlOf = (agentId) => `${base}/${encodeURIComponent(nameOf(agentId))}/.well-known/agent-card.json`;
-  const fail = (res, prefix) => ({ ...res, ok: false, data: { error: { message: `${prefix}${explainQuilrError(res).message}` } } });
+  const fail = (res, prefix) => ({ ...res, ok: false, data: { error: { message: `${prefix}${explainWhitematterError(res).message}` } } });
 
   return {
     profile: p,
@@ -406,20 +407,20 @@ function createQuilrAdapter(profile, { timeoutMs = 8000, onRequest } = {}) {
     registrationMode: () => 'manual',
     invokeUrl: (agentId) => `${base}/${encodeURIComponent(nameOf(agentId))}`,
 
-    /** Quilr has no health endpoint: an authenticated catalog read proves reachability AND a valid key. */
+    /** Whitematter has no health endpoint: an authenticated catalog read proves reachability AND a valid key. */
     async health() {
       const res = await send('health', `${base}/catalog`, { headers: keyHeaders(), timeoutMs: 4000 });
       return res.ok ? res : fail(res, '');
     },
 
-    /** Registration happens in the Quilr console; verify it by reading the card Quilr serves for this agent. */
+    /** Registration happens in the Whitematter console; verify it by reading the card Whitematter serves for this agent. */
     async register({ agentId }) {
       const url = cardUrlOf(agentId);
       const res = await send('verify', url, { headers: keyHeaders(), timeoutMs });
       if (res.ok) return { ...res, data: { listed: true, mode: 'verified', servedCardUrl: url } };
-      return fail(res, `Quilr does not serve "${nameOf(agentId)}" to this caller key: `);
+      return fail(res, `Whitematter does not serve "${nameOf(agentId)}" to this caller key: `);
     },
-    async deregister() { return { ok: true, status: 204, data: { skipped: 'Quilr registrations are managed in the Quilr console' } }; },
+    async deregister() { return { ok: true, status: 204, data: { skipped: 'Whitematter registrations are managed in the Whitematter console' } }; },
 
     /** Discovery: the caller's catalog (agents it has grants for), then each candidate's served card. */
     async discover({ skill } = {}) {
@@ -428,7 +429,7 @@ function createQuilrAdapter(profile, { timeoutMs = 8000, onRequest } = {}) {
       if (cat.ok) {
         const d = cat.data;
         const list = Array.isArray(d) ? d : d?.agents ?? d?.items ?? d?.results ?? d?.data ?? [];
-        slugs = list.map((a) => a.slug ?? a.agent ?? a.handle ?? (a.url ? parseQuilrUrl(a.url).slug : null) ?? (a.card_url ? parseQuilrUrl(a.card_url).slug : null) ?? a.id ?? a.name).filter(Boolean);
+        slugs = list.map((a) => a.slug ?? a.agent ?? a.handle ?? (a.url ? parseWhitematterUrl(a.url).slug : null) ?? (a.card_url ? parseWhitematterUrl(a.card_url).slug : null) ?? a.id ?? a.name).filter(Boolean);
       }
       for (const n of Object.values(names)) if (!slugs.includes(n)) slugs.push(n);
       const cards = await Promise.all(slugs.map(async (slug) => {
@@ -440,20 +441,20 @@ function createQuilrAdapter(profile, { timeoutMs = 8000, onRequest } = {}) {
         .filter(({ r }) => r.ok && Array.isArray(r.data?.skills))
         .filter(({ r }) => !skill || r.data.skills.some((s) => s.id === skill || s.name === skill))
         .map(({ slug, url, r }) => ({ agentId: idOf(slug), slug, name: r.data.name, url: r.data.supportedInterfaces?.find((i) => i.protocolBinding === 'JSONRPC')?.url ?? `${base}/${slug}`, provider: r.data.provider?.organization ?? null, agentCardUrl: url, health: { status: 'healthy' }, card: r.data }));
-      if (!cat.ok && !agents.length) return { ...fail(cat, 'Quilr catalog: '), url: `${base}/catalog`, agents: [] };
+      if (!cat.ok && !agents.length) return { ...fail(cat, 'Whitematter catalog: '), url: `${base}/catalog`, agents: [] };
       return { ok: true, status: 200, url: `${base}/catalog`, agents, data: { agents } };
     },
 
     async invoke(targetAgentId, rpc, { credentialOverride, headers: extra = {} } = {}) {
       const url = `${base}/${encodeURIComponent(nameOf(targetAgentId))}`;
       const res = await send('invoke', url, { method: 'POST', headers: { ...keyHeaders(credentialOverride), 'A2A-Version': '1.0', ...extra }, body: rpc, timeoutMs: 30_000 });
-      const out = { ...res, route: 'gateway', url, gateway: { id: p.id, name: p.name }, quilrRequestId: res.headers?.['x-quilr-request-id'] ?? null };
+      const out = { ...res, route: 'gateway', url, gateway: { id: p.id, name: p.name }, whitematterRequestId: res.headers?.[WM_REQUEST_ID_HEADER] ?? null };
       if (!res.ok || res.data?.error?.code <= -31000) {
-        const ex = explainQuilrError(res);
+        const ex = explainWhitematterError(res);
         if (res.data?.error && typeof res.data.error === 'object' && 'code' in res.data.error && typeof res.data.error.code === 'number' && res.data.error.code < 0) {
           out.data = { ...res.data, error: { ...res.data.error, message: ex.message } };
         } else if (!res.ok) {
-          out.data = { error: { message: ex.message, quilrCode: ex.code } };
+          out.data = { error: { message: ex.message, whitematterCode: ex.code } };
         }
       }
       return out;
@@ -494,19 +495,19 @@ export function plannedRequests(profile, { agentId, peerId, cardUrl, agentEndpoi
   const out = [{ id: 'health', title: 'Health check', direction: 'agent → gateway', method: 'GET', url: join(p.url, p.healthPath), headers: {}, note: 'Sent without credentials.' }];
   const inb = inboundAuth(p);
 
-  if (p.kind === 'quilr') {
-    const { base } = parseQuilrUrl(p.url);
+  if (p.kind === 'whitematter') {
+    const { base } = parseWhitematterUrl(p.url);
     const names = parseAgentNames(p.agentNames);
     const slug = (id) => names[id] ?? id;
-    out[0] = { id: 'health', title: 'Reachability + caller key check (catalog)', direction: 'agent → gateway', method: 'GET', url: `${base}/catalog`, headers: outboundHeaders(p), note: 'Quilr has no health endpoint; an authenticated catalog read proves the address and the caller key.' };
-    out.push({ id: 'register', title: `Verify ${agentId} is registered (card served by Quilr)`, direction: 'agent → gateway', method: 'GET', url: `${base}/${slug(agentId)}/.well-known/agent-card.json`, headers: outboundHeaders(p), note: `Agents are registered by an admin in the Quilr console (card URL ${cardUrl}, outbound auth = the gateway → agent header below). This read needs a caller key with a grant for "${slug(agentId)}".` });
+    out[0] = { id: 'health', title: 'Reachability + caller key check (catalog)', direction: 'agent → gateway', method: 'GET', url: `${base}/catalog`, headers: outboundHeaders(p), note: 'Whitematter has no health endpoint; an authenticated catalog read proves the address and the caller key.' };
+    out.push({ id: 'register', title: `Verify ${agentId} is registered (card served by Whitematter)`, direction: 'agent → gateway', method: 'GET', url: `${base}/${slug(agentId)}/.well-known/agent-card.json`, headers: outboundHeaders(p), note: `Agents are registered by an admin in the Whitematter console (card URL ${cardUrl}, outbound auth = the gateway → agent header below). This read needs a caller key with a grant for "${slug(agentId)}".` });
     out.push({ id: 'discover', title: 'Discover agents this caller key can reach', direction: 'agent → gateway', method: 'GET', url: `${base}/catalog`, headers: outboundHeaders(p) });
     out.push({ id: 'invoke', title: `Call ${peerId} through ${p.name}`, direction: 'agent → gateway', method: 'POST', url: `${base}/${slug(peerId)}`, headers: { ...outboundHeaders(p), 'A2A-Version': '1.0', ...json }, body: { jsonrpc: '2.0', id: 'curl-check', method: 'GetTask', params: { id: 'task_curl_check' } }, note: 'A harmless GetTask: -32001 (task not found) means the key, grant and routing work. -31401/-31403/-31404 are explained in the gateway card.' });
     out.push({
       id: 'inbound', title: `What ${p.name} must send to ${agentId} (its "outbound auth")`, direction: 'gateway → agent', method: 'POST', url: agentEndpoint,
       headers: { ...(inb ? { [inb.name]: inb.value } : {}), 'A2A-Version': '1.0', ...json },
       body: { jsonrpc: '2.0', id: 'curl-check', method: 'GetTask', params: { id: 'task_curl_check' } },
-      note: inb ? `In the Quilr console, set this agent's outbound auth to ${/^bearer\s/i.test(inb.value) && inb.name.toLowerCase() === 'authorization' ? 'Bearer token' : `API key header "${inb.name}"`} with this value.` : 'No gateway → agent header configured: this agent will reject calls from Quilr.',
+      note: inb ? `In the Whitematter console, set this agent's outbound auth to ${/^bearer\s/i.test(inb.value) && inb.name.toLowerCase() === 'authorization' ? 'Bearer token' : `API key header "${inb.name}"`} with this value.` : 'No gateway → agent header configured: this agent will reject calls from Whitematter.',
     });
     return out;
   }

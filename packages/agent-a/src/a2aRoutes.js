@@ -57,7 +57,7 @@ export function buildA2ARoutes({ cfg, agent, engine, gateway, getCard, localTask
       if (body.method === 'SendMessage') {
         const msg = fromV1Message(p.message ?? { parts: [] });
         const data = dataPart(msg) ?? {};
-        // Skill-routed (QuilrAI): act only on the skill named in message.metadata.skill_id.
+        // Skill-routed (Whitematter): act only on the skill named in message.metadata.skill_id.
         const skill = msg.metadata?.skill_id ?? p.metadata?.skill_id ?? p.metadata?.envelope?.skill ?? data.skill ?? 'vehicle_telemetry_query';
         if (skill === 'service_status_updates') return reply(200, rpcError(body.id, V1_ERRORS.UNSUPPORTED_OPERATION, 'service_status_updates arrives as A2A push notifications (POST /a2a/push), not as SendMessage'));
         if (skill !== 'vehicle_telemetry_query') return reply(200, rpcError(body.id, V1_ERRORS.UNSUPPORTED_OPERATION, `Skill '${skill}' is not supported by ${cfg.agentId} over A2A v1`));

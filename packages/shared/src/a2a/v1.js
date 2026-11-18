@@ -119,7 +119,7 @@ export function requestToV1(rpc, { pushConfig, omitContextId = false } = {}) {
   const meta = env ? { envelope: env } : undefined;
   switch (rpc.method) {
     case 'message/send': {
-      // A new task: no taskId (the server assigns it). Gateways that issue their own IDs (QuilrAI)
+      // A new task: no taskId (the server assigns it). Gateways that issue their own IDs (Whitematter)
       // also get no contextId. skill_id names the skill for skill-routed agents.
       const { taskId, contextId, ...msg } = rpc.params.message;
       const skillId = env?.skill ? { skill_id: env.skill } : {};

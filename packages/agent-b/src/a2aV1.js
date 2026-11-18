@@ -2,6 +2,7 @@
 import {
   rpcError, rpcResult, dataPart, createEnvelope, fromV1Message, toV1Task, toV1State, fromV1State,
   V1_ERRORS, RPC_ERRORS, waitForTerminal, TaskError, newId,
+  WM_CHAIN_HEADER, WM_REQUEST_ID_HEADER,
 } from '@axon-fleet/shared';
 import { validateWorkOrder } from './adapters/a2aAdapter.js';
 
@@ -18,13 +19,13 @@ export async function handleV1({ req, body, inbound, cfg, agent, tasks, event, r
         if (msg.taskId && tasks.has(msg.taskId)) return err(V1_ERRORS.UNSUPPORTED_OPERATION, `Task ${msg.taskId} already exists; this agent does not accept follow-up messages on a task`);
         const given = p.metadata?.envelope ?? p.message.metadata?.envelope ?? null;
         const data = dataPart(msg) ?? {};
-        // Skill-routed (QuilrAI): the skill named in message.metadata.skill_id wins.
+        // Skill-routed (Whitematter): the skill named in message.metadata.skill_id wins.
         const skill = msg.metadata?.skill_id ?? p.metadata?.skill_id ?? given?.skill ?? data.skill ?? p.metadata?.skill ?? SERVICE_SKILL;
-        // Delegation chain from the gateway (QuilrAI X-Quilr-A2A-Chain + W3C baggage). Agent B makes no
+        // Delegation chain from the gateway (Whitematter chain header + W3C baggage). Agent B makes no
         // further gateway calls while handling this task; if it did, it would pass the header on.
         const h = req?.headers ?? {};
-        const chain = (h['x-quilr-a2a-chain'] || h.baggage || h['x-quilr-request-id'])
-          ? { quilrChain: h['x-quilr-a2a-chain'] ? `present (${String(h['x-quilr-a2a-chain']).length} chars)` : null, baggage: h.baggage ? 'present' : null, quilrRequestId: h['x-quilr-request-id'] ?? null }
+        const chain = (h[WM_CHAIN_HEADER] || h.baggage || h[WM_REQUEST_ID_HEADER])
+          ? { gatewayChain: h[WM_CHAIN_HEADER] ? `present (${String(h[WM_CHAIN_HEADER]).length} chars)` : null, baggage: h.baggage ? 'present' : null, gatewayRequestId: h[WM_REQUEST_ID_HEADER] ?? null }
           : null;
         const payload = data.payload ?? data;
         const sender = given?.sender_agent_id ?? inbound.verifiedCaller ?? 'a2a-client';
@@ -65,7 +66,7 @@ export async function handleV1({ req, body, inbound, cfg, agent, tasks, event, r
         event('accepted', {
           reason: inbound.reason, protocol: 'a2a-v1', taskId: task.id,
           severity: inbound.via === 'direct' ? 'warning' : 'info',
-          detail: `A2A v1 SendMessage via ${inbound.via === 'gateway' ? (inbound.gateway?.name ?? 'gateway') : 'direct call'}${inbound.verifiedCaller ? `, caller ${inbound.verifiedCaller}` : ', caller not identified by the transport'}${pushCfg ? '; push webhook registered' : ''}`,
+          detail: `A2A v1 SendMessage via ${inbound.via === 'gateway' ? (inbound.gateway?.name ?? 'gateway') : 'direct call'} from '${sender}'${pushCfg ? '; push webhook registered' : ''}`,
         });
         if (p.configuration?.returnImmediately) return reply(200, rpcResult(body.id, { task: toV1Task(task) }));
         const done = await waitForTerminal(tasks, task.id, cfg.blockingTimeoutMs ?? 25_000);

@@ -3,6 +3,7 @@
 import {
   AgentConnectivity, RuntimeConfig, callDirect, fetchAgentCard, getSkill, nowIso, readEnvelope, HttpError, cardEndpoint,
   requestToV1, responseFromV1, newId, hostScope,
+  WM_REQUEST_ID_HEADER,
 } from '@axon-fleet/shared';
 
 export const SERVICE_SKILL = 'vehicle_service_orchestration';
@@ -40,8 +41,8 @@ export function createGatewayConfig({ cfg, getCard, getBaseUrl, logger, exchange
       const candidates = res.agents.filter((a) => a.agentId !== cfg.agentId);
       const pick = candidates.find((a) => a.health?.status === 'healthy') ?? candidates[0];
       if (!pick) {
-        throw new HttpError(404, 'NO_AGENT', gw.kind === 'quilr'
-          ? `No agent with skill '${SERVICE_SKILL}' is visible to this caller key at '${gw.name}'. Quilr only shows agents the caller has a grant for: check the caller's grants in the Quilr console and the agent slugs on this gateway.`
+        throw new HttpError(404, 'NO_AGENT', gw.kind === 'whitematter'
+          ? `No agent with skill '${SERVICE_SKILL}' is visible to this caller key at '${gw.name}'. Whitematter only shows agents the caller has a grant for: check the caller's grants in the Whitematter console and the agent slugs on this gateway.`
           : `No agent with skill '${SERVICE_SKILL}' is registered at '${gw.name}'`);
       }
       lastDiscovery = {
@@ -79,16 +80,16 @@ export function createGatewayConfig({ cfg, getCard, getBaseUrl, logger, exchange
     return { ok: true };
   }
 
-  // Push webhooks per gateway. QuilrAI only delivers to HTTPS webhooks on public addresses and answers
+  // Push webhooks per gateway. Whitematter only delivers to HTTPS webhooks on public addresses and answers
   // -32003 when push is off for the organization; in those cases Agent A polls GetTask instead.
   const pushOffFor = new Set();
   function pushAllowed(profile) {
     if (pushOffFor.has(profile.id)) return false;
     const mode = profile.pushMode ?? 'auto';
     if (mode === 'off') return false;
-    if (mode === 'on' || profile.kind !== 'quilr') return true;
+    if (mode === 'on' || profile.kind !== 'whitematter') return true;
     const u = new URL(`${getBaseUrl()}/a2a/push`);
-    return (u.protocol === 'https:' && hostScope(u.hostname) === 'public') || process.env.QUILR_ALLOW_INSECURE_WEBHOOK === 'true';
+    return (u.protocol === 'https:' && hostScope(u.hostname) === 'public') || process.env.WHITEMATTER_ALLOW_INSECURE_WEBHOOK === 'true';
   }
 
   /** Send a JSON-RPC request to a discovered agent through whichever path is active. */
@@ -98,13 +99,13 @@ export function createGatewayConfig({ cfg, getCard, getBaseUrl, logger, exchange
     const v1 = adapter?.protocol === 'a2a-v1';
     let wire = rpc;
     let pushCfg = null;
-    const quilr = adapter?.profile?.kind === 'quilr';
+    const whitematter = adapter?.profile?.kind === 'whitematter';
     let pushNote = null;
     if (v1) {
       const wantPush = rpc.method === 'message/send' && kind === 'service_request';
       pushCfg = wantPush && pushAllowed(adapter.profile) ? issuePushConfig() : undefined;
       if (wantPush && !pushCfg) pushNote = 'no push webhook attached (status is polled)';
-      wire = requestToV1(rpc, { pushConfig: pushCfg ?? undefined, omitContextId: quilr });
+      wire = requestToV1(rpc, { pushConfig: pushCfg ?? undefined, omitContextId: whitematter });
     }
     let res = viaGateway
       ? await adapter.invoke(target.agentId, wire, { credentialOverride })
@@ -115,7 +116,7 @@ export function createGatewayConfig({ cfg, getCard, getBaseUrl, logger, exchange
       securityEvents.push({ timestamp: nowIso(), direction: 'outbound', kind, mode: 'gateway', gateway: adapter.profile.name, decision: 'push_disabled', severity: 'info', detail: `${adapter.profile.name} has push notifications turned off (-32003); resending without a webhook and polling GetTask.` });
       pushCfg = null;
       pushNote = 'push is off at the gateway (-32003); resent without a webhook, status is polled';
-      wire = requestToV1(rpc, { omitContextId: quilr });
+      wire = requestToV1(rpc, { omitContextId: whitematter });
       res = await adapter.invoke(target.agentId, wire, { credentialOverride });
     }
     const rawBody = res.data;
@@ -126,7 +127,7 @@ export function createGatewayConfig({ cfg, getCard, getBaseUrl, logger, exchange
     const env = readEnvelope(rpc);
     const rpcErr = res.data?.error;
     const gwName = res.gateway?.name ?? null;
-    const gwReqId = res.headers?.['x-gateway-request-id'] ?? res.headers?.['x-quilr-request-id'] ?? null;
+    const gwReqId = res.headers?.['x-gateway-request-id'] ?? res.headers?.[WM_REQUEST_ID_HEADER] ?? null;
     exchanges.push({ id: rpc.id, timestamp: nowIso(), direction: 'outbound', kind, mode: res.route, gateway: gwName, protocol: v1 ? 'a2a-v1' : 'poc', url: res.url, request: wire, response: { status: res.status, body: rawBody, gatewayRequestId: gwReqId }, durationMs: res.ms });
     if (kind !== 'poll_task_status' || !res.ok) securityEvents.push({
       timestamp: nowIso(), direction: 'outbound', kind, mode: res.route, gateway: gwName, protocol: v1 ? 'a2a-v1' : 'poc', target: target.agentId, skill: env?.skill, method: rpc.method,

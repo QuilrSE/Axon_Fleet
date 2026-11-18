@@ -114,7 +114,7 @@ export class AgentConnectivity {
     const prev = st.registration.status;
     st.registration = res.ok
       ? { status: 'registered', at: nowIso(), error: null, httpStatus: res.status, mode: res.data?.mode ?? null, servedCardUrl: res.data?.servedCardUrl ?? null, action: res.data?.action ?? null, bifrostName: res.data?.name ?? null }
-      : { status: ['bifrost', 'quilr'].includes(profile.kind) && res.status === 404 ? 'not_registered' : 'failed', at: nowIso(), httpStatus: res.status, mode: profile.kind === 'bifrost' ? this.adapter(profile).registrationMode() : null, error: res.data?.error?.message ?? res.data?.message ?? res.data?.error ?? `HTTP ${res.status}` };
+      : { status: ['bifrost', 'whitematter'].includes(profile.kind) && res.status === 404 ? 'not_registered' : 'failed', at: nowIso(), httpStatus: res.status, mode: profile.kind === 'bifrost' ? this.adapter(profile).registrationMode() : null, error: res.data?.error?.message ?? res.data?.message ?? res.data?.error ?? `HTTP ${res.status}` };
     if (prev !== st.registration.status) this.logger?.info('registration_status', { agentId: this.agentId, gateway: profile.id, ...st.registration });
     return st.registration;
   }
@@ -172,12 +172,12 @@ export class AgentConnectivity {
       w.push({ level: 'info', text: `Manual registration: in Bifrost → Agents → Agent Catalog add "${this.adapter(p).nameOf(this.agentId)}" with card URL ${this.getCardUrl()} and request header Authorization: Bearer <${p.inboundCredential?.startsWith('env:') ? p.inboundCredential.slice(4) : 'forwarding token'}>. Or set management auth so the agent registers itself.` });
     }
     if (p.tlsSkipVerify && gw.secure) w.push({ level: 'warn', text: 'TLS certificate verification is off for this gateway.' });
-    if (p.kind === 'quilr') {
+    if (p.kind === 'whitematter') {
       const cardUrl = this.getCardUrl();
-      if (!(card?.secure && card.scope === 'public')) w.push({ level: 'warn', text: `Quilr only calls agents over HTTPS on public addresses and never follows redirects. This agent's card URL is ${cardUrl}. Deploy to Cloudflare (or put it behind a public HTTPS tunnel) and register that URL in the Quilr console.` });
-      if (p.authScheme === 'none') w.push({ level: 'info', text: 'Target only: no caller key, so this agent can receive calls from Quilr but cannot call other agents through it.' });
-      if (!p.inboundCredential) w.push({ level: 'warn', text: 'Set the gateway → agent header and use the same value as this agent\'s outbound auth in the Quilr console, otherwise calls from Quilr are rejected.' });
-      if (p.registerEnabled === false) w.push({ level: 'info', text: `Register this agent in the Quilr console (Agents → Card URL: ${cardUrl}); the agent cannot register itself with Quilr.` });
+      if (!(card?.secure && card.scope === 'public')) w.push({ level: 'warn', text: `Whitematter only calls agents over HTTPS on public addresses and never follows redirects. This agent's card URL is ${cardUrl}. Deploy to Cloudflare (or put it behind a public HTTPS tunnel) and register that URL in the Whitematter console.` });
+      if (p.authScheme === 'none') w.push({ level: 'info', text: 'Target only: no caller key, so this agent can receive calls from Whitematter but cannot call other agents through it.' });
+      if (!p.inboundCredential) w.push({ level: 'warn', text: 'Set the gateway → agent header and use the same value as this agent\'s outbound auth in the Whitematter console, otherwise calls from Whitematter are rejected.' });
+      if (p.registerEnabled === false) w.push({ level: 'info', text: `Register this agent in the Whitematter console (Agents → Card URL: ${cardUrl}); the agent cannot register itself with Whitematter.` });
       return w;
     }
     if (p.kind === 'bifrost' && card?.scope === 'loopback') {

@@ -1,5 +1,7 @@
 # Using Bifrost as the A2A gateway
 
+In the dashboard, this gateway type is listed as **Dummy A2A Gateway** (Gateway type), and its template is still named *Bifrost Agent Gateway*.
+
 [Bifrost](https://docs.getbifrost.ai/features/agent-gateway) Agent Gateway proxies **A2A v1** only. Both agents now:
 
 - publish an A2A v1 card: `supportedInterfaces: [{ url, protocolBinding: "JSONRPC", protocolVersion: "1.0" }]`, v1 `securitySchemes` / `securityRequirements` (the old v0.3 fields stay alongside unless you pick *strict v1*);

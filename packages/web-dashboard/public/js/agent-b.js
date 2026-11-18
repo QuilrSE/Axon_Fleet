@@ -30,7 +30,7 @@ async function refresh() {
   ]));
   render('controls', controlsList(s.mode.controls));
   if (s.mode.gateways) renderGatewayList(s.mode.gateways, s.mode.gatewayEnabled);
-  render('events', eventsTable(s.securityEvents.slice(0, 30)));
+  render('events', eventsTable(s.securityEvents.slice(0, 30), { showCallerVerification: false }));
   render('exchanges', exchangesList('b-x', s.exchanges.slice(0, 15)));
 }
 
@@ -42,7 +42,7 @@ function renderTasks(s) {
     return `<tr data-select="${esc(t.id)}" class="${t.id === selectedTask ? 'is-selected' : ''}">
       <td><span class="wm-code">${esc(t.id)}</span><br><span class="wm-muted">${esc(t.metadata.envelope?.skill ?? '')}</span></td>
       <td>${esc(t.metadata.vehicleId ?? '—')}</td><td>${badge(ib.via === 'gateway' ? (ib.gateway ?? 'gateway') : (ib.via ?? '—'), ib.via === 'gateway' ? 'gateway' : 'direct')}</td>
-      <td>${esc(ib.verifiedCaller ?? ib.claimedSender ?? '—')} ${ib.verifiedCaller ? badge('verified', 'ok') : badge('unverified', 'warn')}</td>
+      <td>${esc(ib.verifiedCaller ?? ib.claimedSender ?? '—')}</td>
       <td>${esc(stageLabel(t.metadata.stage))}</td><td>${badge(t.status.state)}</td></tr>`;
   }), { empty: 'Waiting for A2A tasks from Agent A.' }));
 

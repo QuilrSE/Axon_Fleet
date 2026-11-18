@@ -1,10 +1,11 @@
 // Gateway profiles: the list of A2A gateways an agent knows about, which one routes its traffic
 // ("active"), and which ones it publishes its Agent Card to ("registerEnabled").
 // Persisted in the agent's RuntimeConfig; credentials are masked whenever profiles leave the agent.
-import { GATEWAY_KINDS, AUTH_SCHEMES, REGISTER_BODIES, CONTROL_KEYS, PROTOCOLS, MANAGEMENT_AUTH, withKindDefaults, parseQuilrUrl } from './gatewayAdapters.js';
+import { GATEWAY_KINDS, AUTH_SCHEMES, REGISTER_BODIES, CONTROL_KEYS, PROTOCOLS, MANAGEMENT_AUTH, withKindDefaults, parseWhitematterUrl } from './gatewayAdapters.js';
 import { HttpError } from '../utils/http.js';
 import { HEADER_NAME_RE, RESERVED_HEADERS, isValidHeaderValue } from './gatewayHeaders.js';
 import { normalizeGatewayUrl, hostScope } from '../utils/network.js';
+import { WM_KEY_HEADER } from './whitematterProtocol.js';
 
 const SECRET_FIELDS = ['credential', 'inboundCredential', 'managementCredential'];
 const PATH_FIELDS = ['registerPath', 'deregisterPath', 'discoverPath', 'invokePath', 'healthPath'];
@@ -41,10 +42,10 @@ export function validateProfile(p, { allowlist = [], allowPrivate = true, requir
   if (!GATEWAY_KINDS[p.kind]) errors.push(`kind must be one of ${Object.keys(GATEWAY_KINDS).join(', ')}`);
   const d = withKindDefaults(p);
   if (!AUTH_SCHEMES.includes(d.authScheme)) errors.push(`authScheme must be one of ${AUTH_SCHEMES.join(', ')}`);
-  if (p.kind === 'quilr' && url && !/\/a2a\/[^/]+/.test(url.pathname)) errors.push('QuilrAI URL must contain /a2a/{org}, e.g. https://guardrails-usa-1.quilr.ai/a2a/tadc5ab68a5195659 (an agent or card URL is fine too)');
-  if (p.kind === 'quilr' && d.authScheme === 'api-key' && d.authHeader && !['x-quilr-a2a-key', 'authorization'].includes(d.authHeader.toLowerCase())) errors.push('QuilrAI accepts the caller key only as "Authorization: Bearer …" or in the "X-Quilr-A2A-Key" header');
-  if (d.authScheme !== 'none' && !p.credential) errors.push(p.kind === 'quilr' ? 'a Quilr caller key (sk-quilr-a2a-…) is required to call agents through Quilr; choose "No authentication" if this agent is only a target' : p.kind === 'bifrost' ? 'a Bifrost virtual key is required (value or env:VAR_NAME), or set authentication to "none" if Bifrost does not enforce it' : 'credential is required unless authScheme is "none" (a value or env:VAR_NAME)');
-  if (!['bifrost', 'quilr'].includes(p.kind) && !REGISTER_BODIES[d.registerBody]) errors.push(`registerBody must be one of ${Object.keys(REGISTER_BODIES).join(', ')}`);
+  if (p.kind === 'whitematter' && url && !/\/a2a\/[^/]+/.test(url.pathname)) errors.push('Whitematter URL must contain /a2a/{org}, e.g. https://<gateway-host>/a2a/tadc5ab68a5195659 (an agent or card URL is fine too)');
+  if (p.kind === 'whitematter' && d.authScheme === 'api-key' && d.authHeader && ![WM_KEY_HEADER.toLowerCase(), 'authorization'].includes(d.authHeader.toLowerCase())) errors.push('The Whitematter A2A Gateway accepts the caller key only as "Authorization: Bearer …" or in its caller-key header; use "Bearer token" mode');
+  if (d.authScheme !== 'none' && !p.credential) errors.push(p.kind === 'whitematter' ? 'a Whitematter caller key (sk-…) is required to call agents through Whitematter; choose "No authentication" if this agent is only a target' : p.kind === 'bifrost' ? 'a Bifrost virtual key is required (value or env:VAR_NAME), or set authentication to "none" if Bifrost does not enforce it' : 'credential is required unless authScheme is "none" (a value or env:VAR_NAME)');
+  if (!['bifrost', 'whitematter'].includes(p.kind) && !REGISTER_BODIES[d.registerBody]) errors.push(`registerBody must be one of ${Object.keys(REGISTER_BODIES).join(', ')}`);
   if (d.protocol && !PROTOCOLS[d.protocol]) errors.push(`protocol must be one of ${Object.keys(PROTOCOLS).join(', ')}`);
   if (p.kind === 'bifrost') {
     if (!MANAGEMENT_AUTH[d.managementAuthScheme]) errors.push(`managementAuthScheme must be one of ${Object.keys(MANAGEMENT_AUTH).join(', ')}`);
@@ -52,7 +53,7 @@ export function validateProfile(p, { allowlist = [], allowPrivate = true, requir
     if (d.managementAuthScheme !== 'none' && !p.managementCredential) errors.push('managementCredential is required for the chosen management auth (value or env:VAR_NAME)');
     if (p.agentNames && !/^\s*[a-z0-9-]+\s*[=:]\s*[a-z0-9]+(?:-[a-z0-9]+)*\s*(,\s*[a-z0-9-]+\s*[=:]\s*[a-z0-9]+(?:-[a-z0-9]+)*\s*)*$/.test(p.agentNames)) errors.push('agentNames must look like "agent-b=dealership,agent-a=vehicle" (Bifrost names: lowercase letters, digits, single hyphens)');
   }
-  if (!['bifrost', 'quilr'].includes(p.kind) && !['POST', 'PUT'].includes(String(d.registerMethod).toUpperCase())) errors.push('registerMethod must be POST or PUT');
+  if (!['bifrost', 'whitematter'].includes(p.kind) && !['POST', 'PUT'].includes(String(d.registerMethod).toUpperCase())) errors.push('registerMethod must be POST or PUT');
   for (const f of PATH_FIELDS) if (d[f] && !String(d[f]).startsWith('/')) errors.push(`${f} must start with "/"`);
   if (d.authHeader && !HEADER_NAME_RE.test(d.authHeader)) errors.push('agent → gateway header name is not a valid HTTP header name');
   if (d.authHeader && d.authScheme === 'api-key' && RESERVED_HEADERS.has(d.authHeader.toLowerCase())) errors.push(`"${d.authHeader}" is managed by the agent and cannot carry credentials`);
@@ -80,7 +81,30 @@ export class GatewayProfileStore {
     this.policy = { allowlist, allowPrivate, requireHttpsForPublic };
   }
 
-  list() { return this.runtime.get('gateways') ?? this.defaults; }
+  list() { return this.#migrate(this.runtime.get('gateways') ?? this.defaults); }
+
+  /**
+   * Saved settings from earlier versions may hold a gateway type that no longer exists. Entries with
+   * the Whitematter gateway's settings (push mode + an /a2a/{org} address) become the Whitematter type,
+   * with id "whitematter-a2a-gateway"; routing follows them. Runs once per load and is persisted.
+   */
+  #migrate(list) {
+    if (this.migrated) return list;
+    this.migrated = true;
+    let activeId = this.runtime.get('activeGatewayId');
+    let changed = false;
+    const taken = new Set(list.map((p) => p.id));
+    const out = list.map((p) => {
+      if (GATEWAY_KINDS[p.kind] || p.pushMode === undefined || !/\/a2a\/[^/]+/.test(p.url ?? '')) return p;
+      changed = true;
+      const id = taken.has('whitematter-a2a-gateway') ? p.id : 'whitematter-a2a-gateway';
+      taken.add(id);
+      if (activeId === p.id) activeId = id;
+      return { ...p, kind: 'whitematter', id, name: /a2a gateway$/i.test(p.name ?? '') ? 'Whitematter A2A Gateway' : p.name };
+    });
+    if (changed) this.runtime.set({ gateways: out, activeGatewayId: activeId }, 'migration');
+    return out;
+  }
   get(id) { return this.list().find((p) => p.id === id) ?? null; }
   activeId() {
     const id = this.runtime.get('activeGatewayId');
@@ -96,10 +120,10 @@ export class GatewayProfileStore {
     if (out.url) {
       try { out.url = normalizeGatewayUrl(out.url, input.scheme); } catch { /* validateProfile reports it */ }
     }
-    // QuilrAI: accept an agent URL or card URL; keep the /a2a/{org} base and remember the slug.
-    if ((input.kind ?? '') === 'quilr' && out.url) {
+    // Whitematter: accept an agent URL or card URL; keep the /a2a/{org} base and remember the slug.
+    if ((input.kind ?? '') === 'whitematter' && out.url) {
       try {
-        const { base, slug } = parseQuilrUrl(out.url);
+        const { base, slug } = parseWhitematterUrl(out.url);
         out.url = base;
         if (slug && !out.agentNames && input.pastedAgentId) out.agentNames = `${input.pastedAgentId}=${slug}`;
       } catch { /* validateProfile reports it */ }

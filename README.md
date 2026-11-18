@@ -100,9 +100,9 @@ The whole PoC also runs as a single **Cloudflare Worker**: the dashboard as stat
 
 The full reviewer script is in [`docs/demo-script.md`](docs/demo-script.md).
 
-## QuilrAI A2A Gateway
+## Whitematter A2A Gateway
 
-Both agents comply with the [QuilrAI A2A Gateway](https://docs.quilrai.dev/a2a-gateway/get-started/a2a-gateway): caller keys on every request, gateway-issued task IDs, `skill_id` for skill-routed agents, push through Quilr's relay (or polling when push is off), outbound-auth headers, and plain-language `-31xxx` errors. Add the *QuilrAI A2A Gateway* template on both dashboards; you can paste an agent URL from the Quilr console. Setup, console settings and a compliance matrix: **[docs/quilr.md](docs/quilr.md)**.
+Both agents comply with the [Whitematter A2A Gateway](the Whitematter A2A Gateway documentation): caller keys on every request, gateway-issued task IDs, `skill_id` for skill-routed agents, push through Whitematter's relay (or polling when push is off), outbound-auth headers, and plain-language `-31xxx` errors. Add the *Whitematter A2A Gateway* template on both dashboards; you can paste an agent URL from the Whitematter console. Setup, console settings and a compliance matrix: **[docs/whitematter.md](docs/whitematter.md)**.
 
 ## Bifrost
 
@@ -199,12 +199,12 @@ The toggle takes effect immediately (no restart) and is persisted to `.runtime/a
 ```text
 axon-fleet/
 ├── README.md · package.json · docker-compose.yml · Dockerfile · .env.example
-├── docs/            architecture, a2a-flow, agent-cards, gateway-security, gateway-toggle, custom-gateways, bifrost, quilr, cloudflare, api-reference, demo-script
+├── docs/            architecture, a2a-flow, agent-cards, gateway-security, gateway-toggle, custom-gateways, bifrost, whitematter, cloudflare, api-reference, demo-script
 ├── examples/        Agent Cards + captured A2A payloads (npm run examples)
 ├── wrangler.jsonc   Cloudflare Workers config (import-ready)
 ├── cloudflare/      worker.js (entry + Durable Objects), shims/ (express, cors, undici on the Fetch API)
 ├── scripts/         start-all.mjs, capture-examples.mjs, reset-runtime.mjs, cf-smoke.mjs
-├── tests/           unit, integration, gateways, network, bifrost, headers, quilr tests; mocks/ (Bifrost, Quilr emulators); helpers.js
+├── tests/           unit, integration, gateways, network, bifrost, headers, whitematter tests; mocks/ (Bifrost, Whitematter emulators); helpers.js
 └── packages/
     ├── shared/src/  a2a/ (agentCard, message, task, client, registry, agentConnectivity, gatewayAdapters,
     │                gatewayProfiles, gatewayRoutes) · telemetry/ · security/ · utils/
@@ -261,7 +261,7 @@ axon-fleet/
 | Custom gateway URL at runtime (add, edit, test, route through, remove) | `shared/src/a2a/gatewayProfiles.js`, `gatewayRoutes.js`, `web-dashboard/public/js/gateways.js` |
 | A2A v1.0 cards and JSON-RPC methods, v1 push notifications, Bifrost gateway profile | `shared/src/a2a/v1.js`, `v1Server.js`, `gatewayAdapters.js`, `agent-b/src/a2aV1.js`, `docs/bifrost.md`, `tests/bifrost.test.js` |
 | Explicit auth header name/value per hop, additional headers, equivalent curl (planned / sent / received) | `shared/src/a2a/gatewayHeaders.js`, `curl.js`, `gatewayAdapters.js#plannedRequests`, `web-dashboard/public/js/gateways.js`, `tests/headers.test.js` |
-| QuilrAI A2A Gateway compliance (caller keys, gateway task IDs, skill_id, push relay / -32003 fallback, -31xxx errors) | `gatewayAdapters.js` (QuilrAI type), `agent-a/src/agent.js`, `agent-b/src/a2aV1.js`, `docs/quilr.md`, `tests/quilr.test.js` |
+| Whitematter A2A Gateway compliance (caller keys, gateway task IDs, skill_id, push relay / -32003 fallback, -31xxx errors) | `gatewayAdapters.js` (Whitematter type), `agent-a/src/agent.js`, `agent-b/src/a2aV1.js`, `docs/whitematter.md`, `tests/whitematter.test.js` |
 | Cloudflare Workers deployment (dashboard import), Durable Objects, smoke test | `wrangler.jsonc`, `cloudflare/`, `scripts/cf-smoke.mjs`, `docs/cloudflare.md` |
 | HTTP and HTTPS gateways on localhost, private and public networks; proxy/CA support; diagnostics | `shared/src/utils/network.js`, `tests/network.test.js` |
 | Copyable Agent Card URL / endpoint / ID, advertised URL, peer card URL | `shared/src/a2a/identityRoutes.js`, `web-dashboard/public/js/identity.js` |

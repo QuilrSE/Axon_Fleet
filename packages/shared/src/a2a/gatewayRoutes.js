@@ -21,9 +21,9 @@ export function gatewayPresets(agentEnvPrefix) {
       managementAuthScheme: 'basic', managementCredential: '', allowByDefault: true, agentNames: '',
       declaredControls: ['authentication', 'allowlist', 'audit', 'tracing', 'policy_routing'],
     },
-    quilr: {
-      label: 'QuilrAI A2A Gateway', kind: 'quilr', name: 'QuilrAI A2A Gateway', url: 'https://guardrails-usa-1.quilr.ai/a2a/',
-      authScheme: 'bearer', credential: '', inboundHeaderName: 'Authorization', inboundCredential: 'Bearer quilr-forward-token',
+    whitematter: {
+      label: 'Whitematter A2A Gateway', kind: 'whitematter', name: 'Whitematter A2A Gateway', url: '',
+      authScheme: 'bearer', credential: '', inboundHeaderName: 'Authorization', inboundCredential: 'Bearer whitematter-forward-token',
       agentNames: '', registerEnabled: false, pushMode: 'auto',
       declaredControls: ['authentication', 'allowlist', 'skill_authorization', 'rate_limiting', 'audit', 'tracing', 'policy_routing', 'request_validation'],
     },

@@ -110,11 +110,11 @@ export function controlsList(controls) {
   return `<ul class="wm-controls">${controls.map((c) => `<li class="${c.applied ? 'on' : 'off'}"><span class="mark" aria-label="${c.applied ? 'applied' : 'not applied'}">${c.applied ? '✓' : '✕'}</span><span><span class="name">${esc(c.name)}</span><small>${esc(c.enforcedBy)}</small></span></li>`).join('')}</ul>`;
 }
 
-export function eventsTable(events) {
+export function eventsTable(events, { showCallerVerification = true } = {}) {
   if (!events.length) return '<div class="wm-empty">No security events yet.</div>';
   return `<ul class="wm-feed">${events.map((e) => {
     const route = e.via ?? e.mode;
-    const who = e.skill ? `skill ${e.skill}${e.caller ? `, caller ${e.caller}${e.direction === 'inbound' && e.callerVerified === false ? ' (unverified)' : ''}` : ''}` : '';
+    const who = e.skill ? `skill ${e.skill}${e.caller ? `, caller ${e.caller}${showCallerVerification && e.direction === 'inbound' && e.callerVerified === false ? ' (unverified)' : ''}` : ''}` : '';
     return `<li>
       <div class="meta"><span class="when">${esc(time(e.timestamp))}</span>${badge(e.decision, e.severity === 'critical' ? 'critical' : e.decision)}${route ? badge(route, route === 'gateway' ? 'gateway' : 'direct') : ''}<span class="sub">${esc(e.direction)}${e.kind ? ` ${esc(e.kind)}` : ''}${e.gateway ? ` via ${esc(e.gateway)}` : ''}${e.httpStatus !== undefined ? `, HTTP ${esc(e.httpStatus)}` : ''}</span></div>
       <div>${esc(e.detail ?? e.reason ?? '')}</div>
